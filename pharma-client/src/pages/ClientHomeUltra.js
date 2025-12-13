@@ -6,6 +6,7 @@ import 'leaflet/dist/leaflet.css';
 import { PHARMACIES_REELLES } from '../realPharmacies';
 import OrderModal from '../components/OrderModal';
 import DrawerMenu from '../components/DrawerMenu';
+import socketService from '../services/socket';
 import './ClientHomeUltra.css';
 
 // Icône pour la position de l'utilisateur (point bleu)
@@ -40,6 +41,7 @@ function ClientHomeUltra() {
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   const [showOnlyDeGarde, setShowOnlyDeGarde] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [notification, setNotification] = useState(null);
 
   useEffect(() => {
     // Obtenir la position de l'utilisateur
@@ -65,6 +67,33 @@ function ClientHomeUltra() {
     }));
     
     setNearbyPharmacies(pharmacies);
+
+    // Connecter Socket.IO et écouter les événements d'acceptation
+    socketService.connect();
+
+    // Écouter les acceptations de commande
+    const handleOrderAccepted = (data) => {
+      console.log('✅ [CLIENT] Commande acceptée par un livreur:', data);
+      
+      // Afficher une notification
+      setNotification({
+        type: 'success',
+        title: 'Livreur assigné !',
+        message: 'Un livreur a accepté votre commande et est en route vers la pharmacie.',
+        orderId: data.orderId
+      });
+
+      // Masquer après 5 secondes
+      setTimeout(() => setNotification(null), 5000);
+    };
+
+    // Note: Nous écouterons un événement générique car nous ne connaissons pas l'ID
+    // à l'avance. Alternative: écouter tous les événements ou stocker l'orderId
+    socketService.on('order:accepted', handleOrderAccepted);
+
+    return () => {
+      socketService.off('order:accepted');
+    };
   }, []);
 
   // Filtrer les pharmacies selon le mode
@@ -91,10 +120,29 @@ function ClientHomeUltra() {
 
   return (
     <div className="client-home-ultra">
+      {/* Notification d'acceptation de commande */}
+      {notification && (
+        <div className={`order-notification ${notification.type}`}>
+          <div className="notification-icon">
+            {notification.type === 'success' ? '✅' : 'ℹ️'}
+          </div>
+          <div className="notification-content">
+            <h4>{notification.title}</h4>
+            <p>{notification.message}</p>
+          </div>
+          <button 
+            className="notification-close"
+            onClick={() => setNotification(null)}
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Menu latéral */}
       <DrawerMenu 
         isOpen={isDrawerOpen} 
-        onClose={() => setIsDrawerOpen(false)} 
+        onClose={() => setIsDrawerOpen(false)}
       />
 
       {/* Modal de commande */}

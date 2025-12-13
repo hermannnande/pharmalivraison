@@ -511,14 +511,14 @@ app.post('/api/deliveries/:id/accept', (req, res) => {
       });
     }
     
-    order.livreurId = decoded.id;
+    order.livreurId = decoded.userId;
     order.status = 'accepted';
     order.acceptedAt = new Date();
     
     const newDelivery = {
       id: String(deliveries.length + 1),
       orderId: order.id,
-      livreurId: decoded.id,
+      livreurId: decoded.userId,
       status: 'accepted',
       currentLocation: order.pharmacyLocation,
       startLocation: order.pharmacyLocation,
@@ -531,7 +531,20 @@ app.post('/api/deliveries/:id/accept', (req, res) => {
     
     deliveries.push(newDelivery);
     
-    io.emit(`order:${order.id}:accepted`, { orderId: order.id, livreurId: decoded.id });
+    console.log(`📡 [BACKEND] Émission événements d'acceptation - Commande ${order.id}`);
+    
+    // Émettre événement spécifique à la commande
+    io.emit(`order:${order.id}:accepted`, { orderId: order.id, livreurId: decoded.userId });
+    
+    // Émettre événement global pour le client
+    io.emit('order:accepted', { 
+      orderId: order.id, 
+      orderNumber: order.orderNumber,
+      livreurId: decoded.userId,
+      clientId: order.clientId
+    });
+    
+    console.log(`✅ [BACKEND] Événements émis avec succès`);
     
     res.json({ success: true, delivery: newDelivery, order });
   } catch (error) {

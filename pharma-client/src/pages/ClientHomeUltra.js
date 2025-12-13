@@ -31,6 +31,17 @@ const createPharmacyIcon = () => L.divIcon({
   popupAnchor: [0, -50]
 });
 
+// Icône pour le livreur (moto en mouvement)
+const driverIcon = L.divIcon({
+  className: 'driver-marker',
+  html: `<div class="driver-pin">
+    <div class="driver-pulse"></div>
+    <div class="driver-icon">🏍️</div>
+  </div>`,
+  iconSize: [50, 50],
+  iconAnchor: [25, 25]
+});
+
 function ClientHomeUltra() {
   // const navigate = useNavigate();
   const [userPosition, setUserPosition] = useState([5.3600, -4.0083]); // Abidjan par défaut
@@ -42,6 +53,8 @@ function ClientHomeUltra() {
   const [showOnlyDeGarde, setShowOnlyDeGarde] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [notification, setNotification] = useState(null);
+  const [activeDelivery, setActiveDelivery] = useState(null); // Stocke orderId + livreurId
+  const [driverPosition, setDriverPosition] = useState(null);
 
   useEffect(() => {
     // Obtenir la position de l'utilisateur
@@ -76,16 +89,24 @@ function ClientHomeUltra() {
     const handleOrderAccepted = (data) => {
       console.log('✅ [CLIENT] Commande acceptée par un livreur:', data);
       
+      // Stocker les infos de livraison active
+      setActiveDelivery({
+        orderId: data.orderId,
+        livreurId: data.livreurId,
+        orderNumber: data.orderNumber
+      });
+      
       // Afficher une notification
       setNotification({
         type: 'success',
         title: 'Livreur assigné !',
         message: 'Un livreur a accepté votre commande et est en route vers la pharmacie.',
-        orderId: data.orderId
+        orderId: data.orderId,
+        showTrackButton: true
       });
 
-      // Masquer après 5 secondes
-      setTimeout(() => setNotification(null), 5000);
+      // Masquer après 8 secondes
+      setTimeout(() => setNotification(null), 8000);
     };
 
     // Écouter TOUS les événements order:*:accepted (wildcard ne marche pas avec Socket.IO)
@@ -102,6 +123,20 @@ function ClientHomeUltra() {
         if (eventName.match(/^order:\d+:accepted$/)) {
           console.log('🎯 [CLIENT] Détection événement acceptation spécifique!');
           handleOrderAccepted(args[0]);
+        }
+        
+        // Si c'est une mise à jour de position GPS
+        if (eventName === 'driver-location-update') {
+          console.log('📍 [CLIENT] Position livreur reçue:', args[0]);
+          const locationData = args[0];
+          if (locationData && locationData.location) {
+            setDriverPosition({
+              lat: locationData.location.latitude,
+              lng: locationData.location.longitude,
+              speed: locationData.location.speed,
+              timestamp: locationData.location.timestamp
+            });
+          }
         }
       });
     }
@@ -145,6 +180,17 @@ function ClientHomeUltra() {
           <div className="notification-content">
             <h4>{notification.title}</h4>
             <p>{notification.message}</p>
+            {notification.showTrackButton && activeDelivery && (
+              <button 
+                className="track-button"
+                onClick={() => {
+                  setNotification(null);
+                  // La carte reste visible avec le marqueur du livreur
+                }}
+              >
+                📍 Voir sur la carte
+              </button>
+            )}
           </div>
           <button 
             className="notification-close"
@@ -248,6 +294,28 @@ function ClientHomeUltra() {
           <Marker position={userPosition} icon={userIcon}>
             <Popup>Votre position</Popup>
           </Marker>
+
+          {/* Marqueur du livreur si une livraison est active */}
+          {driverPosition && activeDelivery && (
+            <Marker 
+              position={[driverPosition.lat, driverPosition.lng]} 
+              icon={driverIcon}
+            >
+              <Popup>
+                <div style={{ textAlign: 'center' }}>
+                  <strong>🏍️ Votre livreur</strong>
+                  <br />
+                  <small>Commande: {activeDelivery.orderNumber}</small>
+                  {driverPosition.speed > 0 && (
+                    <>
+                      <br />
+                      <small>Vitesse: {(driverPosition.speed * 3.6).toFixed(0)} km/h</small>
+                    </>
+                  )}
+                </div>
+              </Popup>
+            </Marker>
+          )}
 
           {/* Cercle autour de l'utilisateur */}
           <Circle

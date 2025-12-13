@@ -38,10 +38,10 @@ function OrderModal({ isOpen, onClose }) {
     };
 
     try {
-      // Envoyer la commande au backend
-      console.log('📤 Envoi de la commande au backend...', orderData);
+      // Envoyer la commande au backend [VERSION 2]
+      console.log('📤 [V2] Envoi de la commande au backend...', orderData);
       const response = await createOrder(orderData);
-      console.log('✅ Commande créée:', response);
+      console.log('✅ [V2] Commande créée:', response);
       
       // Message de succès moderne
       const modal = document.createElement('div');

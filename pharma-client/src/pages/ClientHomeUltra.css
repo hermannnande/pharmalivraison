@@ -599,6 +599,35 @@
   flex-shrink: 0;
 }
 
+/* Bouton de fermeture dans le panneau d'urgence */
+.close-urgence-btn {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.close-urgence-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.close-urgence-btn:active {
+  transform: scale(0.95);
+}
+
+.close-urgence-btn svg {
+  display: block;
+}
+
 /* Bouton Support WhatsApp */
 .whatsapp-btn {
   position: fixed;
@@ -708,6 +737,7 @@
     max-height: 70vh;
   }
 }
+
 
 
 

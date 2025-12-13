@@ -119,16 +119,42 @@ function ClientHomeUltra() {
       </div>
 
       {/* Bouton Urgence Pharmacie de Garde */}
-      <button 
-        className={`urgence-btn ${showOnlyDeGarde ? 'active' : ''}`}
-        onClick={handleUrgenceDeGarde}
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <path d="M12 2L4 5V11C4 16.55 7.84 21.74 13 23C18.16 21.74 22 16.55 22 11V5L12 2Z" fill="currentColor"/>
-          <path d="M10 17L6 13L7.41 11.59L10 14.17L16.59 7.58L18 9L10 17Z" fill="white"/>
-        </svg>
-        <span>{showOnlyDeGarde ? 'Toutes les pharmacies' : 'Urgence pharmacie de garde'}</span>
-      </button>
+      {showOnlyDeGarde && (
+        <button 
+          className="urgence-btn active"
+          onClick={handleUrgenceDeGarde}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2L4 5V11C4 16.55 7.84 21.74 13 23C18.16 21.74 22 16.55 22 11V5L12 2Z" fill="currentColor"/>
+            <path d="M10 17L6 13L7.41 11.59L10 14.17L16.59 7.58L18 9L10 17Z" fill="white"/>
+          </svg>
+          <span>Mode urgence actif</span>
+          <button 
+            className="close-urgence-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleUrgenceDeGarde();
+            }}
+            title="Fermer"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/>
+            </svg>
+          </button>
+        </button>
+      )}
+      {!showOnlyDeGarde && (
+        <button 
+          className="urgence-btn"
+          onClick={handleUrgenceDeGarde}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2L4 5V11C4 16.55 7.84 21.74 13 23C18.16 21.74 22 16.55 22 11V5L12 2Z" fill="currentColor"/>
+            <path d="M10 17L6 13L7.41 11.59L10 14.17L16.59 7.58L18 9L10 17Z" fill="white"/>
+          </svg>
+          <span>Urgence pharmacie de garde</span>
+        </button>
+      )}
 
       {/* Bouton Support WhatsApp */}
       <button 

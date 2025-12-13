@@ -88,8 +88,8 @@ function ClientHomeUltra() {
       setTimeout(() => setNotification(null), 5000);
     };
 
-    // Note: Nous écouterons un événement générique car nous ne connaissons pas l'ID
-    // à l'avance. Alternative: écouter tous les événements ou stocker l'orderId
+    // Écouter TOUS les événements order:*:accepted (wildcard ne marche pas avec Socket.IO)
+    // Solution: Écouter l'événement générique
     console.log('👂 [CLIENT] Ecoute de l\'événement "order:accepted"...');
     socketService.on('order:accepted', handleOrderAccepted);
 
@@ -97,6 +97,12 @@ function ClientHomeUltra() {
     if (socketService.socket) {
       socketService.socket.onAny((eventName, ...args) => {
         console.log(`📩 [CLIENT] Événement reçu: ${eventName}`, args);
+        
+        // Si c'est un événement d'acceptation spécifique, le traiter aussi
+        if (eventName.match(/^order:\d+:accepted$/)) {
+          console.log('🎯 [CLIENT] Détection événement acceptation spécifique!');
+          handleOrderAccepted(args[0]);
+        }
       });
     }
 

@@ -217,7 +217,6 @@
 .close-panel-btn:active {
   transform: scale(0.95);
 }
-}
 
 .drag-indicator:hover .drag-line {
   background: #bdbdbd;

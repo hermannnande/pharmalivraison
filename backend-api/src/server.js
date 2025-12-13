@@ -811,6 +811,15 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('location:update', data);
   });
 
+  // Nouvelle version: driver-location-update (utilisée par les apps)
+  socket.on('driver-location-update', (data) => {
+    console.log('📍 [BACKEND] Position livreur reçue:', data);
+    
+    // Retransmettre à TOUS les clients connectés
+    io.emit('driver-location-update', data);
+    console.log('📡 [BACKEND] Position retransmise aux clients');
+  });
+
   // Nouveau message
   socket.on('message:send', (data) => {
     const { orderId, senderId, message } = data;

@@ -7,7 +7,7 @@ import './Login.css';
 
 function Login() {
   const navigate = useNavigate();
-  const [loginMethod, setLoginMethod] = useState('phone'); // 'email' ou 'phone'
+  // const [loginMethod, setLoginMethod] = useState('phone'); // 'email' ou 'phone'
   const [formData, setFormData] = useState({
     email: '',
     phone: '',

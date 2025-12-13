@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './LivreurDashboard.css';
 
@@ -28,7 +28,7 @@ const LivreurDashboard = () => {
     }
   ]);
 
-  const [showOrderDetails, setShowOrderDetails] = useState(null);
+  // const [showOrderDetails, setShowOrderDetails] = useState(null);
 
   const handleAcceptOrder = (orderId) => {
     setOrders(orders.map(order => 

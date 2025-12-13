@@ -1,0 +1,717 @@
+.client-home-ultra {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background: #f8f9fa;
+  padding-bottom: 0; /* Le panel gère déjà l'espacement */
+}
+
+/* En-tête moderne */
+.map-header-modern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 1000;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
+}
+
+.back-btn-modern,
+.location-btn-modern {
+  width: 42px;
+  height: 42px;
+  background: white;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #333;
+}
+
+.back-btn-modern:active,
+.location-btn-modern:active {
+  transform: scale(0.95);
+}
+
+.location-btn-modern {
+  color: #2e7d32;
+}
+
+.map-title-modern {
+  font-size: 22px;
+  font-weight: 700;
+  color: #2e7d32;
+  margin: 0;
+  flex: 1;
+  text-align: center;
+  letter-spacing: -0.5px;
+}
+
+/* Carte */
+.map-container-ultra {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+}
+
+/* Marqueur de position utilisateur */
+.user-location-marker {
+  position: relative;
+  background: transparent;
+  border: none;
+}
+
+.user-location-pulse {
+  width: 20px;
+  height: 20px;
+  background: #2196f3;
+  border-radius: 50%;
+  border: 4px solid white;
+  box-shadow: 0 0 0 0 rgba(33, 150, 243, 0.7), 0 4px 12px rgba(33, 150, 243, 0.3);
+  animation: pulse 2s infinite;
+  position: relative;
+  z-index: 10;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(33, 150, 243, 0.7), 0 4px 12px rgba(33, 150, 243, 0.3);
+  }
+  70% {
+    box-shadow: 0 0 0 25px rgba(33, 150, 243, 0), 0 4px 12px rgba(33, 150, 243, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(33, 150, 243, 0), 0 4px 12px rgba(33, 150, 243, 0.3);
+  }
+}
+
+/* Marqueurs pharmacies */
+.pharmacy-marker {
+  background: transparent;
+  border: none;
+}
+
+.pharmacy-pin svg {
+  filter: drop-shadow(0 4px 10px rgba(46, 125, 50, 0.25));
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pharmacy-marker:hover .pharmacy-pin svg {
+  transform: scale(1.15) translateY(-3px);
+}
+
+/* Popup personnalisé */
+.pharmacy-popup {
+  padding: 12px;
+  min-width: 200px;
+}
+
+.pharmacy-popup h3 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1b5e20;
+}
+
+.pharmacy-popup p {
+  margin: 0 0 10px 0;
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.pharmacy-popup .status {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+
+.pharmacy-popup .status.open {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.pharmacy-popup .status.closed {
+  background: #ffebee;
+  color: #c62828;
+}
+
+/* Panel moderne en bas */
+.bottom-panel-modern {
+  position: absolute;
+  bottom: 0; /* Plus besoin d'espace pour le menu du bas */
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 20px 20px 0 0;
+  padding: 6px 18px 20px;
+  z-index: 500;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  max-height: 85vh;
+  overflow: hidden;
+}
+
+.bottom-panel-modern.expanded {
+  padding-bottom: 100px;
+}
+
+/* Indicateur de drag */
+.drag-indicator {
+  display: flex;
+  justify-content: center;
+  padding: 6px 0 8px;
+  cursor: pointer;
+}
+
+.drag-line {
+  width: 36px;
+  height: 3px;
+  background: #e0e0e0;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.drag-indicator:hover .drag-line {
+  background: #bdbdbd;
+  width: 45px;
+}
+
+/* Contenu du panel */
+.panel-content {
+  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* En-tête du panel */
+.panel-header {
+  margin-bottom: 14px;
+}
+
+.location-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: linear-gradient(135deg, #e8f5e9 0%, #f1f8f4 100%);
+  color: #2e7d32;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 16px;
+  margin-bottom: 8px;
+}
+
+.location-badge svg {
+  width: 16px;
+  height: 16px;
+}
+
+.location-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #1b5e20;
+  margin: 0 0 8px 0;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+
+.pharmacy-stats {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+}
+
+.stat-number {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2e7d32;
+}
+
+.stat-label {
+  color: #757575;
+  font-size: 12px;
+}
+
+.stat-divider {
+  color: #e0e0e0;
+}
+
+/* Boutons d'action modernes */
+.action-buttons-modern {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 0;
+}
+
+.btn-modern {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  min-height: 48px;
+}
+
+.btn-modern::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.1);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.btn-modern:active::before {
+  opacity: 1;
+}
+
+.btn-primary {
+  background: #2e7d32;
+  color: white;
+  box-shadow: 0 3px 12px rgba(46, 125, 50, 0.2);
+}
+
+.btn-primary:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.2);
+}
+
+.btn-secondary {
+  background: white;
+  color: #2e7d32;
+  border: 2px solid #2e7d32;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.btn-secondary:active {
+  background: #f8faf9;
+  transform: translateY(1px);
+}
+
+.btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.btn-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.btn-text {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  flex: 1;
+}
+
+.btn-label {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.btn-sublabel {
+  display: none;
+}
+
+/* Liste des pharmacies */
+.pharmacies-list {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 2px solid #f5f5f5;
+  animation: fadeIn 0.4s ease;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.list-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 16px 0;
+}
+
+.list-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pharmacy-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  background: #fafafa;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.pharmacy-item:active {
+  transform: scale(0.98);
+}
+
+.pharmacy-item.selected {
+  background: #e8f5e9;
+  border-color: #2e7d32;
+}
+
+.pharmacy-icon {
+  width: 40px;
+  height: 40px;
+  background: white;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.pharmacy-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.pharmacy-info h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 4px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pharmacy-info p {
+  font-size: 12px;
+  color: #757575;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pharmacy-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.pharmacy-status.open {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.pharmacy-status.closed {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* Ajustement de la carte Leaflet */
+.leaflet-container {
+  background: #f5f5f5;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 16px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+  border: none;
+}
+
+.leaflet-popup-tip {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Scrollbar personnalisée */
+.pharmacies-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.pharmacies-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.pharmacies-list::-webkit-scrollbar-thumb {
+  background: #e0e0e0;
+  border-radius: 3px;
+}
+
+.pharmacies-list::-webkit-scrollbar-thumb:hover {
+  background: #bdbdbd;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .map-header-modern {
+    height: 65px;
+    padding: 0 14px;
+  }
+
+  .map-title-modern {
+    font-size: 20px;
+  }
+
+  .back-btn-modern,
+  .location-btn-modern {
+    width: 38px;
+    height: 38px;
+  }
+
+  .bottom-panel-modern {
+    padding: 6px 16px 18px;
+  }
+
+  .location-title {
+    font-size: 18px;
+  }
+
+  .location-badge {
+    font-size: 10px;
+    padding: 5px 10px;
+  }
+
+  .pharmacy-stats {
+    font-size: 12px;
+  }
+
+  .stat-number {
+    font-size: 14px;
+  }
+
+  .btn-modern {
+    padding: 11px 14px;
+    gap: 8px;
+    min-height: 44px;
+  }
+
+  .btn-label {
+    font-size: 14px;
+  }
+}
+
+/* Bouton Urgence Pharmacie de Garde */
+.urgence-btn {
+  position: absolute;
+  top: 85px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  box-shadow: 0 4px 16px rgba(211, 47, 47, 0.3);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 999;
+}
+
+.urgence-btn.active {
+  background: linear-gradient(135deg, #388e3c 0%, #2e7d32 100%);
+  box-shadow: 0 4px 16px rgba(56, 142, 60, 0.3);
+}
+
+.urgence-btn:active {
+  transform: scale(0.98);
+}
+
+.urgence-btn svg {
+  flex-shrink: 0;
+}
+
+/* Bouton Support WhatsApp */
+.whatsapp-btn {
+  position: fixed;
+  bottom: 240px; /* Ajusté car plus de menu en bas */
+  right: 16px;
+  width: 64px;
+  height: 64px;
+  background: #25d366;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 2000;
+  border: 3px solid white;
+}
+
+.whatsapp-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 24px rgba(37, 211, 102, 0.6);
+}
+
+.whatsapp-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+}
+
+/* Badge de garde dans popup */
+.pharmacy-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.badge-de-garde {
+  display: inline-block;
+  padding: 4px 8px;
+  background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 8px;
+  animation: pulse-badge 2s infinite;
+}
+
+@keyframes pulse-badge {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(211, 47, 47, 0);
+  }
+}
+
+/* Mini badge dans la liste */
+.mini-badge-garde {
+  margin-left: 6px;
+  font-size: 14px;
+}
+
+.pharmacy-item.de-garde {
+  border-left: 4px solid #d32f2f;
+}
+
+/* Tag urgence dans les stats */
+.urgence-tag {
+  color: #d32f2f;
+  font-weight: 700;
+}
+
+/* Ajustement pour très petits écrans */
+@media (max-width: 380px) {
+  .action-buttons-modern {
+    flex-direction: column;
+  }
+
+  .btn-modern {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .btn-text {
+    text-align: left;
+  }
+
+  .urgence-btn {
+    font-size: 14px;
+    padding: 12px 16px;
+  }
+
+  .whatsapp-btn {
+    width: 56px;
+    height: 56px;
+    bottom: 200px; /* Ajusté pour mobile sans menu bas */
+  }
+  
+  .bottom-panel-modern {
+    bottom: 0;
+    max-height: 70vh;
+  }
+}
+
+
+
+
+
+
+

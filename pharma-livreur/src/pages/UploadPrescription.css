@@ -1,0 +1,275 @@
+.upload-prescription {
+  min-height: 100vh;
+  background: #F9FAFB;
+}
+
+.upload-header {
+  background: white;
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.upload-header h1 {
+  font-size: 1.3rem;
+  color: #111827;
+}
+
+.upload-content {
+  padding: 30px 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.upload-icon-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.prescription-icon {
+  font-size: 4rem;
+  display: inline-block;
+  padding: 20px;
+  background: #D1FAE5;
+  border-radius: 50%;
+}
+
+.upload-content h2 {
+  text-align: center;
+  color: #111827;
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+}
+
+.upload-description {
+  text-align: center;
+  color: #6B7280;
+  font-size: 1.05rem;
+  margin-bottom: 30px;
+  line-height: 1.5;
+}
+
+.upload-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.upload-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 18px 25px;
+  border-radius: 15px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.camera-btn {
+  background: #10B981;
+  color: white;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.camera-btn:hover {
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.gallery-btn {
+  background: white;
+  color: #10B981;
+  border: 2px solid #10B981;
+}
+
+.gallery-btn:hover {
+  background: #F0FDF4;
+}
+
+.btn-icon {
+  font-size: 1.5rem;
+}
+
+.preview-section {
+  margin-bottom: 30px;
+}
+
+.preview-image {
+  position: relative;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin-bottom: 15px;
+}
+
+.preview-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.remove-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.remove-btn:hover {
+  background: #DC2626;
+  transform: scale(1.1);
+}
+
+.file-name {
+  text-align: center;
+  color: #059669;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.prescription-illustration {
+  margin: 30px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.illustration-box {
+  width: 220px;
+  height: 280px;
+  background: white;
+  border: 3px solid #10B981;
+  border-radius: 20px;
+  padding: 30px 25px;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.rx-symbol {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #10B981;
+  margin-bottom: 20px;
+}
+
+.prescription-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.line {
+  height: 3px;
+  background: #E5E7EB;
+  border-radius: 2px;
+}
+
+.line.short {
+  width: 60%;
+}
+
+.camera-badge {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  width: 50px;
+  height: 50px;
+  background: #10B981;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 18px;
+  background: #10B981;
+  color: white;
+  border: none;
+  border-radius: 15px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  transition: all 0.3s ease;
+  margin-bottom: 30px;
+}
+
+.submit-btn:hover {
+  background: #059669;
+  transform: translateY(-2px);
+}
+
+.info-section {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.info-section h3 {
+  color: #111827;
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+}
+
+.info-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.info-section li {
+  padding: 10px 0;
+  padding-left: 25px;
+  color: #6B7280;
+  position: relative;
+}
+
+.info-section li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #10B981;
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .upload-content h2 {
+    font-size: 1.5rem;
+  }
+
+  .upload-description {
+    font-size: 1rem;
+  }
+
+  .illustration-box {
+    width: 180px;
+    height: 240px;
+    padding: 20px 15px;
+  }
+
+  .rx-symbol {
+    font-size: 2.5rem;
+  }
+}
+

@@ -1,0 +1,461 @@
+.login-page-modern {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8f5e9 100%);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Header avec logo */
+.login-header {
+  text-align: center;
+  margin-bottom: 30px;
+  animation: fadeInDown 0.6s ease;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.login-logo {
+  margin-bottom: 15px;
+}
+
+.logo-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #2e7d32 0%, #66bb6a 100%);
+  border-radius: 20px;
+  box-shadow: 0 8px 20px rgba(46, 125, 50, 0.3);
+}
+
+.cross {
+  font-size: 35px;
+  color: white;
+  font-weight: bold;
+}
+
+.truck {
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+  font-size: 28px;
+  background: white;
+  border-radius: 50%;
+  padding: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.app-tagline {
+  font-size: 18px;
+  color: #2e7d32;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Carte de connexion */
+.login-card {
+  width: 100%;
+  max-width: 450px;
+  background: white;
+  border-radius: 24px;
+  padding: 40px 30px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  animation: fadeInUp 0.6s ease;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.login-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1b5e20;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.login-subtitle {
+  font-size: 15px;
+  color: #757575;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+/* Sélecteur Email/Téléphone */
+.login-method-selector {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 25px;
+  background: #f5f5f5;
+  padding: 5px;
+  border-radius: 12px;
+}
+
+.method-btn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #757575;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.method-btn.active {
+  background: white;
+  color: #2e7d32;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Formulaire */
+.login-form-modern {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.form-group-modern {
+  width: 100%;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #f8f9fa;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  transition: all 0.3s ease;
+  overflow: hidden; /* Empêche le débordement */
+}
+
+.input-wrapper:focus-within {
+  border-color: #2e7d32;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.1);
+}
+
+.input-icon {
+  font-size: 20px;
+  margin-right: 12px;
+  flex-shrink: 0; /* Empêche l'icône de rétrécir */
+}
+
+.input-wrapper input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  color: #333;
+  outline: none;
+  min-width: 0; /* Permet au texte de se compresser proprement */
+  width: 100%; /* Assure la pleine largeur disponible */
+}
+
+.input-wrapper input::placeholder {
+  color: #999;
+}
+
+/* Input téléphone avec indicatif */
+.phone-input {
+  padding: 0;
+  gap: 4px; /* Espacement entre éléments */
+}
+
+.country-code {
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  padding: 14px 4px 14px 16px;
+  margin-left: 35px;
+  outline: none;
+  cursor: pointer;
+  color: #333;
+  font-weight: 600;
+  flex-shrink: 0; /* Empêche de rétrécir */
+  white-space: nowrap; /* Empêche le retour à la ligne */
+}
+
+.phone-input input {
+  padding: 14px 16px 14px 4px;
+  font-size: 15px;
+  flex: 1;
+  min-width: 0; /* Important pour éviter le débordement */
+}
+
+/* Toggle password */
+.toggle-password {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 8px;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+
+.toggle-password:hover {
+  opacity: 1;
+}
+
+/* Mot de passe oublié */
+.forgot-password-modern {
+  text-align: right;
+  margin-top: -8px;
+}
+
+.forgot-password-modern button {
+  background: transparent;
+  border: none;
+  color: #2e7d32;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* Bouton de connexion */
+.login-btn-modern {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  margin-top: 10px;
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+  transition: all 0.3s ease;
+}
+
+.login-btn-modern:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(46, 125, 50, 0.4);
+}
+
+.login-btn-modern:active {
+  transform: translateY(0);
+}
+
+/* Section connexion sociale */
+.social-login-section {
+  margin-top: 30px;
+}
+
+.divider-text {
+  text-align: center;
+  color: #999;
+  font-size: 14px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.divider-text::before,
+.divider-text::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 35%;
+  height: 1px;
+  background: #e0e0e0;
+}
+
+.divider-text::before {
+  left: 0;
+}
+
+.divider-text::after {
+  right: 0;
+}
+
+.social-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.social-btn {
+  width: 60px;
+  height: 60px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: white;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.social-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.social-btn.facebook {
+  background: #1877f2;
+}
+
+.social-btn.google {
+  background: #ea4335;
+}
+
+.social-btn.apple {
+  background: #000;
+}
+
+.social-icon {
+  font-family: Arial, sans-serif;
+}
+
+.apple .social-icon::before {
+  content: '';
+  font-size: 28px;
+}
+
+.terms-text {
+  text-align: center;
+  font-size: 12px;
+  color: #999;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Section créer un compte */
+.signup-section {
+  margin-top: 25px;
+  text-align: center;
+  animation: fadeIn 0.8s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.signup-btn {
+  background: transparent;
+  border: none;
+  color: #2e7d32;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 12px 24px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.signup-btn:hover {
+  background: rgba(46, 125, 50, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .login-card {
+    padding: 30px 20px;
+  }
+
+  .login-title {
+    font-size: 24px;
+  }
+
+  .login-subtitle {
+    font-size: 14px;
+  }
+
+  .logo-icon {
+    width: 70px;
+    height: 70px;
+  }
+
+  .cross {
+    font-size: 30px;
+  }
+
+  .truck {
+    font-size: 24px;
+  }
+
+  .social-btn {
+    width: 55px;
+    height: 55px;
+    font-size: 20px;
+  }
+}
+
+/* Section identifiants test LIVREUR */
+.test-credentials-livreur {
+  margin-top: 20px;
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  border: 2px solid #2196f3;
+  border-radius: 16px;
+  padding: 16px 20px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);
+  animation: fadeInUp 0.6s ease 0.3s both;
+}
+
+.test-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1976d2;
+  margin: 0 0 12px 0;
+  text-align: center;
+}
+
+.test-info {
+  background: white;
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+
+.test-info p {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.test-info strong {
+  color: #1976d2;
+  font-weight: 600;
+}

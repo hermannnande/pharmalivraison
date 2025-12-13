@@ -1,0 +1,466 @@
+.onboarding-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8f5e9 100%);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.skip-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: transparent;
+  border: none;
+  color: #666;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.skip-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #333;
+}
+
+.onboarding-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 500px;
+  margin: 0 auto;
+  width: 100%;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.onboarding-icon {
+  margin-bottom: 30px;
+  animation: bounceIn 0.6s ease;
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.icon-circle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 50px;
+  box-shadow: 0 8px 20px rgba(46, 125, 50, 0.2);
+}
+
+/* Icône personnalisée pour la première slide */
+.onboarding-icon-custom {
+  margin-bottom: 30px;
+  animation: bounceIn 0.6s ease;
+}
+
+.delivery-logo {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(135deg, #2e7d32 0%, #66bb6a 100%);
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 20px rgba(46, 125, 50, 0.3);
+}
+
+.cross-icon {
+  font-size: 45px;
+  color: white;
+  font-weight: bold;
+}
+
+.delivery-icons {
+  position: absolute;
+  display: flex;
+  gap: 5px;
+}
+
+.delivery-icon-small {
+  font-size: 20px;
+  background: white;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.delivery-icons .delivery-icon-small:first-child {
+  position: absolute;
+  top: -45px;
+  right: -10px;
+}
+
+.delivery-icons .delivery-icon-small:last-child {
+  position: absolute;
+  bottom: -45px;
+  right: -10px;
+}
+
+.onboarding-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1b5e20;
+  text-align: center;
+  margin-bottom: 15px;
+  line-height: 1.2;
+  padding: 0 20px;
+}
+
+.onboarding-subtitle {
+  font-size: 18px;
+  color: #757575;
+  text-align: center;
+  margin-bottom: 30px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+/* Features Container (Slide 1) */
+.features-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin: 30px 0;
+}
+
+.feature-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.feature-icon-wrapper {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #66bb6a 0%, #2e7d32 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.feature-icon {
+  font-size: 30px;
+  color: white;
+}
+
+.feature-text h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.feature-text p {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+/* Illustration Container (Slide 1) */
+.illustration-container {
+  width: 100%;
+  max-width: 450px;
+  margin: 30px 0 40px;
+}
+
+.delivery-illustration {
+  position: relative;
+  width: 100%;
+  height: 350px;
+  background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+  border-radius: 24px;
+  padding: 30px 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+/* Maison à gauche */
+.house {
+  position: relative;
+  font-size: 70px;
+  z-index: 2;
+  animation: float 3s ease-in-out infinite;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+}
+
+/* Pharmacie à droite */
+.pharmacy {
+  position: relative;
+  font-size: 70px;
+  z-index: 2;
+  animation: float 3s ease-in-out infinite 0.5s;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+}
+
+/* Livreur au centre */
+.delivery-person {
+  position: absolute;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 3;
+  animation: slide 2.5s ease-in-out infinite;
+}
+
+.person {
+  font-size: 45px;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+}
+
+.scooter {
+  font-size: 55px;
+  margin-top: -15px;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+}
+
+/* Colis échangé */
+.package {
+  position: absolute;
+  top: 35%;
+  left: 25%;
+  font-size: 35px;
+  z-index: 4;
+  animation: bounce 1.5s ease-in-out infinite;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+/* Nuages décoratifs */
+.delivery-illustration::before,
+.delivery-illustration::after {
+  content: '☁️';
+  position: absolute;
+  font-size: 30px;
+  opacity: 0.5;
+  animation: float 4s ease-in-out infinite;
+}
+
+.delivery-illustration::before {
+  top: 20px;
+  left: 30px;
+  animation-delay: 1s;
+}
+
+.delivery-illustration::after {
+  top: 40px;
+  right: 50px;
+  animation-delay: 2s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes slide {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(10px);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+/* Steps Container (Slide 3) */
+.steps-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin: 30px 0;
+}
+
+.step-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease;
+}
+
+.step-card:hover {
+  transform: translateX(10px);
+}
+
+.step-icon-wrapper {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.step-icon {
+  font-size: 30px;
+}
+
+.step-text h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.step-text p {
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+}
+
+/* Pagination dots */
+.pagination-dots {
+  display: flex;
+  gap: 10px;
+  margin: 40px 0 20px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.dot.active {
+  width: 30px;
+  border-radius: 5px;
+}
+
+/* Next button */
+.next-btn {
+  width: 100%;
+  max-width: 400px;
+  padding: 16px;
+  border: none;
+  border-radius: 30px;
+  font-size: 18px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+}
+
+.next-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(46, 125, 50, 0.4);
+}
+
+.next-btn:active {
+  transform: translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .onboarding-title {
+    font-size: 24px;
+  }
+
+  .onboarding-subtitle {
+    font-size: 16px;
+  }
+
+  .feature-card,
+  .step-card {
+    padding: 15px;
+  }
+
+  .feature-icon-wrapper,
+  .step-icon-wrapper {
+    width: 50px;
+    height: 50px;
+  }
+
+  .feature-icon,
+  .step-icon {
+    font-size: 24px;
+  }
+
+  .delivery-illustration {
+    height: 250px;
+    padding: 20px;
+  }
+
+  .house,
+  .pharmacy {
+    font-size: 40px;
+  }
+
+  .scooter {
+    font-size: 35px;
+  }
+}

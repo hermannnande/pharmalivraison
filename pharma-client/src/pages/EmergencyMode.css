@@ -1,0 +1,127 @@
+.emergency-page{min-height:100vh;background:linear-gradient(180deg,#fee2e2 0%,#fef3f2 50%,#f8f9fa 100%);padding-bottom:20px}
+
+.emergency-header{background:#ef4444;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 12px rgba(239,68,68,0.3)}
+
+.emergency-header h1{font-size:20px;font-weight:800;color:white;margin:0;flex:1;text-align:center}
+
+.back-btn-emergency{width:44px;height:44px;border:none;background:rgba(255,255,255,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;transition:all 0.3s ease}
+
+.back-btn-emergency:hover{background:rgba(255,255,255,0.3)}
+
+.sos-section{padding:40px 20px;text-align:center}
+
+.sos-button-main{width:200px;height:200px;border:none;border-radius:50%;background:#ef4444;color:white;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto;position:relative;box-shadow:0 10px 30px rgba(239,68,68,0.4);transition:all 0.3s ease}
+
+.sos-button-main:hover{transform:scale(1.05);box-shadow:0 15px 40px rgba(239,68,68,0.5)}
+
+.sos-pulse,.sos-pulse-2{position:absolute;width:100%;height:100%;border-radius:50%;border:4px solid #ef4444;animation:pulse-ring 2s ease-out infinite}
+
+.sos-pulse-2{animation-delay:1s}
+
+@keyframes pulse-ring{0%{transform:scale(1);opacity:1}100%{transform:scale(1.5);opacity:0}}
+
+.sos-icon{font-size:60px;margin-bottom:10px;animation:shake 0.5s ease-in-out infinite}
+
+@keyframes shake{0%,100%{transform:rotate(0deg)}25%{transform:rotate(-10deg)}75%{transform:rotate(10deg)}}
+
+.sos-text{font-size:28px;font-weight:900;letter-spacing:4px}
+
+.sos-description{font-size:16px;color:#ef4444;font-weight:700;margin:20px 0 10px 0}
+
+.sos-info{font-size:14px;color:#6c757d;line-height:1.8;font-weight:500}
+
+.sos-active{text-align:center}
+
+.countdown-circle{width:200px;height:200px;position:relative;margin:0 auto 20px}
+
+.countdown-svg{width:100%;height:100%;transform:rotate(-90deg)}
+
+.countdown-bg{fill:none;stroke:#fee2e2;stroke-width:8}
+
+.countdown-progress{fill:none;stroke:#ef4444;stroke-width:8;stroke-dasharray:283;transition:stroke-dashoffset 1s linear;stroke-linecap:round}
+
+.countdown-number{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:80px;font-weight:900;color:#ef4444;animation:pulse-number 1s ease-in-out infinite}
+
+@keyframes pulse-number{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.1)}}
+
+.sos-activating{font-size:18px;color:#ef4444;font-weight:700;margin-bottom:20px}
+
+.btn-cancel-sos{padding:14px 40px;background:white;color:#ef4444;border:2px solid #ef4444;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;transition:all 0.3s ease}
+
+.btn-cancel-sos:hover{background:#ef4444;color:white}
+
+.emergency-card{background:white;margin:16px;padding:20px;border-radius:16px;box-shadow:0 4px 12px rgba(0,0,0,0.06);border:1px solid #e9ecef}
+
+.card-header-emergency{display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e9ecef}
+
+.card-icon-emergency{width:50px;height:50px;border-radius:14px;background:#ecfdf5;display:flex;align-items:center;justify-content:center;font-size:26px}
+
+.card-icon-emergency.red{background:#fee2e2}
+.card-icon-emergency.blue{background:#dbeafe}
+
+.card-header-emergency h2{font-size:18px;font-weight:800;color:#212529;margin:0 0 4px 0}
+
+.card-header-emergency p{font-size:13px;color:#6c757d;margin:0;font-weight:500}
+
+.pharmacy-info-emergency h3{font-size:17px;font-weight:800;color:#212529;margin:0 0 10px 0}
+
+.pharmacy-address{font-size:14px;color:#6c757d;margin:0 0 6px 0;font-weight:500}
+
+.pharmacy-distance{font-size:14px;color:#10b981;margin:0 0 16px 0;font-weight:700}
+
+.pharmacy-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+.btn-call-pharmacy{padding:14px;background:#10b981;color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.3s ease}
+
+.btn-call-pharmacy:hover{background:#059669;transform:translateY(-2px)}
+
+.btn-navigate{padding:14px;background:#3b82f6;color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.3s ease}
+
+.btn-navigate:hover{background:#2563eb;transform:translateY(-2px)}
+
+.emergency-numbers{display:grid;gap:10px}
+
+.emergency-number-btn{width:100%;padding:14px;background:#f8f9fa;border:2px solid #e9ecef;border-radius:12px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:all 0.3s ease}
+
+.emergency-number-btn:hover{background:white;border-color:#ef4444;transform:translateX(4px)}
+
+.number-icon{font-size:32px;width:50px;height:50px;display:flex;align-items:center;justify-content:center;background:white;border-radius:10px}
+
+.number-name{font-size:14px;color:#6c757d;margin:0 0 4px 0;text-align:left;font-weight:600}
+
+.number-value{font-size:18px;color:#212529;margin:0;font-weight:800;text-align:left}
+
+.contacts-list{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+
+.contact-item{display:flex;align-items:center;gap:12px;padding:12px;background:#f8f9fa;border-radius:12px;border:1px solid #e9ecef}
+
+.contact-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);display:flex;align-items:center;justify-content:center;color:white;font-size:18px;font-weight:700;flex-shrink:0}
+
+.contact-info{flex:1}
+
+.contact-name{font-size:15px;font-weight:700;color:#212529;margin:0 0 2px 0}
+
+.contact-relation{font-size:12px;color:#6c757d;margin:0;font-weight:500}
+
+.btn-contact-call,.btn-contact-share{width:40px;height:40px;border:none;background:white;border-radius:10px;font-size:18px;cursor:pointer;transition:all 0.3s ease;border:1px solid #e9ecef}
+
+.btn-contact-call:hover{background:#10b981;transform:scale(1.1)}
+.btn-contact-share:hover{background:#3b82f6;transform:scale(1.1)}
+
+.btn-add-contact{width:100%;padding:12px;background:white;color:#3b82f6;border:2px dashed #3b82f6;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.3s ease}
+
+.btn-add-contact:hover{background:#eff6ff;border-style:solid}
+
+.medical-quick-info{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+
+.medical-info-item{display:flex;justify-content:space-between;align-items:center;padding:12px;background:#f8f9fa;border-radius:10px}
+
+.medical-info-item span{font-size:14px;color:#6c757d;font-weight:600}
+
+.medical-info-item strong{font-size:15px;color:#212529;font-weight:800}
+
+.btn-view-full{width:100%;padding:12px;background:white;color:#3b82f6;border:2px solid #3b82f6;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.3s ease}
+
+.btn-view-full:hover{background:#3b82f6;color:white}
+
+

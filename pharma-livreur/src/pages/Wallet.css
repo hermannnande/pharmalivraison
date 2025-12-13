@@ -1,0 +1,71 @@
+﻿.wallet-page{min-height:100vh;background:#f8f9fa;padding-bottom:20px}
+
+.wallet-header{background:white;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,0.04);position:sticky;top:0;z-index:100;border-bottom:1px solid #e9ecef}
+
+.wallet-header h1{font-size:20px;font-weight:700;color:#212529;margin:0;flex:1;text-align:center}
+
+.back-btn,.withdraw-btn{width:44px;height:44px;border:none;background:#f8f9fa;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#495057;transition:all 0.3s ease;border:1px solid #e9ecef}
+
+.back-btn:hover,.withdraw-btn:hover{background:#e9ecef}
+
+.balance-card{margin:20px;background:white;border-radius:16px;padding:32px 24px;box-shadow:0 4px 12px rgba(0,0,0,0.08);text-align:center;border:1px solid #e9ecef}
+
+.balance-label{font-size:13px;color:#6c757d;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:1px}
+
+.balance-amount{font-size:40px;font-weight:900;margin-bottom:12px;color:#212529}
+
+.balance-pending{font-size:13px;color:#6c757d;margin-bottom:20px}
+
+.btn-withdraw-main{background:#3b82f6;color:white;border:none;padding:14px 28px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.3s ease}
+
+.btn-withdraw-main:hover{background:#2563eb;transform:translateY(-1px);box-shadow:0 4px 12px rgba(59,130,246,0.3)}
+
+.period-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:0 20px;margin-bottom:20px}
+
+.period-card{background:white;border-radius:12px;padding:18px 14px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,0.06);transition:all 0.3s ease;border:1px solid #e9ecef}
+
+.period-card:hover{box-shadow:0 4px 10px rgba(0,0,0,0.1);transform:translateY(-2px)}
+
+.period-icon{font-size:28px;margin-bottom:10px}
+
+.period-label{font-size:11px;color:#6c757d;margin-bottom:6px;font-weight:600}
+
+.period-amount{font-size:16px;font-weight:800;color:#212529}
+
+.chart-section{background:white;margin:0 20px 20px;padding:20px;border-radius:16px;box-shadow:0 2px 6px rgba(0,0,0,0.06);border:1px solid #e9ecef}
+
+.chart-section h2{font-size:16px;font-weight:700;color:#212529;margin:0 0 20px 0}
+
+.chart-container{display:flex;align-items:flex-end;justify-content:space-between;height:150px;gap:8px}
+
+.chart-bar{width:100%;background:#3b82f6;border-radius:8px 8px 0 0;transition:all 0.3s ease;min-height:30px}
+
+.chart-bar:hover{background:#2563eb}
+
+.chart-value{font-size:11px;font-weight:700;color:white;padding-top:6px}
+
+.chart-label{font-size:12px;color:#6c757d;margin-top:8px;font-weight:600}
+
+.transactions-section{background:white;margin:0 20px 20px;padding:20px;border-radius:16px;box-shadow:0 2px 6px rgba(0,0,0,0.06);border:1px solid #e9ecef}
+
+.transactions-section h2{font-size:16px;font-weight:700;color:#212529;margin:0 0 16px 0}
+
+.transaction-item{display:flex;align-items:center;gap:12px;padding:14px;background:#f8f9fa;border-radius:12px;margin-bottom:10px;transition:all 0.3s ease}
+
+.transaction-item:hover{background:#e9ecef}
+
+.transaction-icon{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px}
+
+.transaction-id{font-size:14px;font-weight:700;color:#212529}
+
+.transaction-date{font-size:12px;color:#6c757d}
+
+.transaction-amount{font-size:16px;font-weight:800}
+
+.transaction-amount.positive{color:#10b981}
+.transaction-amount.negative{color:#ef4444}
+
+.transaction-status{font-size:10px;padding:4px 8px;border-radius:6px;font-weight:700;text-transform:uppercase}
+
+.transaction-status.payÃ©{background:#d1fae5;color:#065f46}
+.transaction-status.validÃ©{background:#dbeafe;color:#1e40af}

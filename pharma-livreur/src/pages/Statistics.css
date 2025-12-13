@@ -1,0 +1,58 @@
+﻿.statistics-page{min-height:100vh;background:#f8f9fa;padding-bottom:20px}
+
+.stats-header{background:white;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,0.04);position:sticky;top:0;z-index:100;border-bottom:1px solid #e9ecef}
+
+.stats-header h1{font-size:20px;font-weight:700;color:#212529;margin:0;flex:1;text-align:center}
+
+.main-stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:20px;margin-bottom:20px}
+
+.stat-card{background:white;border-radius:16px;padding:24px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,0.06);transition:all 0.3s ease;border:1px solid #e9ecef}
+
+.stat-card:hover{box-shadow:0 4px 10px rgba(0,0,0,0.1);transform:translateY(-2px)}
+
+.stat-icon{font-size:40px;margin-bottom:12px}
+
+.stat-value{font-size:32px;font-weight:900;margin-bottom:6px;color:#212529}
+
+.stat-label{font-size:12px;color:#6c757d;font-weight:600}
+
+.stat-card.primary .stat-value{color:#3b82f6}
+.stat-card.success .stat-value{color:#10b981}
+.stat-card.warning .stat-value{color:#f59e0b}
+.stat-card.info .stat-value{color:#8b5cf6}
+
+.performance-section,.rating-section{background:white;margin:0 20px 20px;padding:20px;border-radius:16px;box-shadow:0 2px 6px rgba(0,0,0,0.06);border:1px solid #e9ecef}
+
+.performance-section h2,.rating-section h2{font-size:16px;font-weight:700;color:#212529;margin:0 0 20px 0}
+
+.performance-bar{background:#3b82f6;border-radius:6px 6px 0 0;transition:all 0.3s ease}
+
+.performance-bar:hover{background:#2563eb}
+
+.performance-value{font-size:11px;font-weight:700;color:white;padding-top:6px}
+
+.performance-label{font-size:12px;color:#6c757d;margin-top:8px;font-weight:600}
+
+.additional-stats{background:white;margin:0 20px 20px;border-radius:16px;box-shadow:0 2px 6px rgba(0,0,0,0.06);overflow:hidden;border:1px solid #e9ecef}
+
+.stat-row{display:flex;align-items:center;gap:14px;padding:16px 20px;border-bottom:1px solid #e9ecef}
+
+.stat-row:last-child{border-bottom:none}
+
+.stat-row:hover{background:#f8f9fa}
+
+.stat-row-icon{font-size:28px;width:44px;text-align:center}
+
+.stat-row-label{font-size:13px;color:#6c757d;margin-bottom:4px;font-weight:600}
+
+.stat-row-value{font-size:15px;font-weight:700;color:#212529}
+
+.rating-bar{background:#fbbf24;border-radius:8px;transition:width 0.3s ease}
+
+.earnings-card{background:#3b82f6;margin:0 20px;padding:24px;border-radius:16px;display:flex;align-items:center;gap:16px;color:white}
+
+.earnings-icon{font-size:48px}
+
+.earnings-label{font-size:13px;margin-bottom:4px;font-weight:600}
+
+.earnings-value{font-size:24px;font-weight:900}

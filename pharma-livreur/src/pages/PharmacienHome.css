@@ -1,0 +1,187 @@
+.pharmacien-home {
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+.pharmacien-header {
+  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+  color: white;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.pharmacien-header h1 {
+  font-size: 1.8rem;
+  flex-grow: 1;
+  text-align: center;
+}
+
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card h3 {
+  color: #666;
+  font-size: 1rem;
+  margin-bottom: 15px;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #2196F3;
+}
+
+.commandes-section {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.commandes-section h2 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.commandes-list {
+  display: grid;
+  gap: 20px;
+}
+
+.commande-card {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.commande-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.commande-header h3 {
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.statut-badge {
+  padding: 8px 16px;
+  border-radius: 20px;
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.commande-info {
+  margin: 15px 0;
+}
+
+.commande-info p {
+  margin: 8px 0;
+  color: #666;
+}
+
+.commande-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.commande-actions button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-accept {
+  background: #4CAF50;
+  color: white;
+  flex: 1;
+}
+
+.btn-accept:hover {
+  background: #45a049;
+}
+
+.btn-ready {
+  background: #2196F3;
+  color: white;
+  flex: 1;
+}
+
+.btn-ready:hover {
+  background: #1976D2;
+}
+
+.btn-details {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.btn-details:hover {
+  background: #e0e0e0;
+}
+
+.info-section {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  margin: 20px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.info-section h3 {
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.info-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.info-section li {
+  padding: 10px 0;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .pharmacien-header h1 {
+    font-size: 1.2rem;
+  }
+
+  .stats-container {
+    grid-template-columns: 1fr;
+  }
+
+  .commande-actions {
+    flex-direction: column;
+  }
+}
+

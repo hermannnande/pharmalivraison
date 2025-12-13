@@ -1,0 +1,851 @@
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const http = require('http');
+const socketIO = require('socket.io');
+const jwt = require('jsonwebtoken');
+let { users, pharmacies, medications, orders, deliveries, transactions, notifications } = require('./data');
+
+const app = express();
+const server = http.createServer(app);
+const io = socketIO(server, {
+  cors: { origin: '*', methods: ['GET', 'POST', 'PUT', 'DELETE'] }
+});
+
+app.use(cors());
+app.use(express.json());
+
+// =====================================================
+// MIDDLEWARE D'AUTHENTIFICATION
+// =====================================================
+const authMiddleware = (req, res, next) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+  if (!token) {
+    return res.status(401).json({ success: false, message: 'Token manquant' });
+  }
+
+  try {
+    const decoded = jwt.sign(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    return res.status(401).json({ success: false, message: 'Token invalide' });
+  }
+};
+
+// =====================================================
+// ROUTE PRINCIPALE
+// =====================================================
+app.get('/', (req, res) => {
+  res.json({ 
+    message: '🏥 PharmaLivraison API', 
+    version: '1.0.0',
+    status: 'operational',
+    endpoints: {
+      auth: {
+        login: 'POST /api/auth/login',
+        register: 'POST /api/auth/register'
+      },
+      pharmacies: {
+        list: 'GET /api/pharmacies',
+        detail: 'GET /api/pharmacies/:id',
+        search: 'GET /api/pharmacies/search'
+      },
+      medications: {
+        list: 'GET /api/medications',
+        byPharmacy: 'GET /api/medications/pharmacy/:pharmacyId'
+      },
+      orders: {
+        list: 'GET /api/orders',
+        create: 'POST /api/orders',
+        detail: 'GET /api/orders/:id',
+        updateStatus: 'PUT /api/orders/:id/status'
+      },
+      deliveries: {
+        list: 'GET /api/deliveries',
+        updateLocation: 'PUT /api/deliveries/:id/location',
+        accept: 'POST /api/deliveries/:id/accept',
+        complete: 'POST /api/deliveries/:id/complete'
+      },
+      wallet: {
+        balance: 'GET /api/wallet/balance',
+        transactions: 'GET /api/wallet/transactions',
+        withdraw: 'POST /api/wallet/withdraw'
+      },
+      notifications: {
+        list: 'GET /api/notifications',
+        markRead: 'PUT /api/notifications/:id/read'
+      }
+    }
+  });
+});
+
+// =====================================================
+// HEALTH CHECK
+// =====================================================
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'Backend PharmaLivraison opérationnel',
+    timestamp: new Date(),
+    stats: {
+      users: users.length,
+      pharmacies: pharmacies.length,
+      medications: medications.length,
+      orders: orders.length,
+      deliveries: deliveries.length
+    }
+  });
+});
+
+// =====================================================
+// ROUTES AUTHENTIFICATION
+// =====================================================
+
+// LOGIN
+app.post('/api/auth/login', (req, res) => {
+  console.log('');
+  console.log('========================================');
+  console.log('📥 REQUETE LOGIN RECUE');
+  console.log('========================================');
+  console.log('Body:', req.body);
+  
+  const { phone, email, password } = req.body;
+  
+  // Validation
+  if (!password || (!phone && !email)) {
+    console.log('❌ Données manquantes');
+    return res.status(400).json({ 
+      success: false,
+      message: 'Veuillez fournir un téléphone/email et un mot de passe' 
+    });
+  }
+  
+  console.log('🔍 Recherche utilisateur:', { phone, email });
+  
+  // Recherche utilisateur (supporter phone et email)
+  const user = users.find(u => {
+    if (phone) {
+      const cleanPhone1 = phone.replace(/\s/g, '');
+      const cleanPhone2 = u.phone.replace(/\s/g, '');
+      if (cleanPhone1 === cleanPhone2) return true;
+    }
+    if (email && u.email === email) return true;
+    return false;
+  });
+  
+  console.log('👤 Utilisateur:', user ? `${user.firstName} ${user.lastName} (${user.role})` : 'Non trouvé');
+  
+  if (!user) {
+    console.log('❌ Utilisateur non trouvé');
+    return res.status(401).json({ 
+      success: false,
+      message: 'Identifiants incorrects' 
+    });
+  }
+  
+  if (password !== user.password) {
+    console.log('❌ Mot de passe incorrect');
+    return res.status(401).json({ 
+      success: false,
+      message: 'Identifiants incorrects' 
+    });
+  }
+
+  const token = jwt.sign(
+    { id: user.id, email: user.email, phone: user.phone, role: user.role },
+    process.env.JWT_SECRET || 'secret-dev-key',
+    { expiresIn: '7d' }
+  );
+
+  console.log('✅ Connexion réussie:', user.role);
+
+  res.json({
+    success: true,
+    token,
+    user: {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      name: `${user.firstName} ${user.lastName}`,
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+      avatar: user.avatar,
+      ...(user.role === 'driver' && {
+        isAvailable: user.isAvailable,
+        rating: user.rating,
+        totalDeliveries: user.totalDeliveries,
+        earnings: user.earnings,
+        level: user.level,
+        vehicle: user.vehicle
+      })
+    }
+  });
+});
+
+// REGISTER
+app.post('/api/auth/register', (req, res) => {
+  const { firstName, lastName, email, phone, password, role } = req.body;
+  
+  // Vérifier si l'utilisateur existe
+  const existingUser = users.find(u => u.email === email || u.phone === phone);
+  if (existingUser) {
+    return res.status(400).json({
+      success: false,
+      message: 'Cet email ou téléphone est déjà utilisé'
+    });
+  }
+  
+  const newUser = {
+    id: String(users.length + 1),
+    firstName,
+    lastName,
+    email,
+    phone,
+    password,
+    role: role || 'client',
+    location: null,
+    avatar: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`
+  };
+  
+  users.push(newUser);
+  
+  const token = jwt.sign(
+    { id: newUser.id, email: newUser.email, phone: newUser.phone, role: newUser.role },
+    process.env.JWT_SECRET || 'secret-dev-key',
+    { expiresIn: '7d' }
+  );
+  
+  res.status(201).json({
+    success: true,
+    token,
+    user: {
+      id: newUser.id,
+      firstName: newUser.firstName,
+      lastName: newUser.lastName,
+      name: `${newUser.firstName} ${newUser.lastName}`,
+      email: newUser.email,
+      phone: newUser.phone,
+      role: newUser.role,
+      avatar: newUser.avatar
+    }
+  });
+});
+
+// =====================================================
+// ROUTES PHARMACIES
+// =====================================================
+
+// Liste des pharmacies
+app.get('/api/pharmacies', (req, res) => {
+  const { search, isOpen, is24h, isOnGuard } = req.query;
+  
+  let results = [...pharmacies];
+  
+  if (search) {
+    results = results.filter(p => 
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      p.address.toLowerCase().includes(search.toLowerCase())
+    );
+  }
+  
+  if (isOpen === 'true') {
+    results = results.filter(p => p.isOpen);
+  }
+  
+  if (is24h === 'true') {
+    results = results.filter(p => p.is24h);
+  }
+  
+  if (isOnGuard === 'true') {
+    results = results.filter(p => p.isOnGuard);
+  }
+  
+  res.json({ success: true, pharmacies: results });
+});
+
+// Détail d'une pharmacie
+app.get('/api/pharmacies/:id', (req, res) => {
+  const pharmacy = pharmacies.find(p => p.id === req.params.id);
+  
+  if (!pharmacy) {
+    return res.status(404).json({
+      success: false,
+      message: 'Pharmacie non trouvée'
+    });
+  }
+  
+  // Ajouter les médicaments de cette pharmacie
+  const pharmacyMedications = medications.filter(m => m.pharmacyId === pharmacy.id);
+  
+  res.json({
+    success: true,
+    pharmacy: {
+      ...pharmacy,
+      medications: pharmacyMedications
+    }
+  });
+});
+
+// =====================================================
+// ROUTES MÉDICAMENTS
+// =====================================================
+
+// Liste des médicaments
+app.get('/api/medications', (req, res) => {
+  const { search, category, requiresPrescription } = req.query;
+  
+  let results = [...medications];
+  
+  if (search) {
+    results = results.filter(m => 
+      m.name.toLowerCase().includes(search.toLowerCase())
+    );
+  }
+  
+  if (category) {
+    results = results.filter(m => m.category === category);
+  }
+  
+  if (requiresPrescription) {
+    results = results.filter(m => m.requiresPrescription === (requiresPrescription === 'true'));
+  }
+  
+  res.json({ success: true, medications: results });
+});
+
+// Médicaments d'une pharmacie
+app.get('/api/medications/pharmacy/:pharmacyId', (req, res) => {
+  const pharmacyMedications = medications.filter(m => m.pharmacyId === req.params.pharmacyId);
+  
+  res.json({ success: true, medications: pharmacyMedications });
+});
+
+// =====================================================
+// ROUTES COMMANDES
+// =====================================================
+
+// Liste des commandes
+app.get('/api/orders', (req, res) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+  
+  if (!token) {
+    return res.status(401).json({ success: false, message: 'Non autorisé' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret-dev-key');
+    let userOrders = [...orders];
+    
+    if (decoded.role === 'client') {
+      userOrders = orders.filter(o => o.clientId === decoded.id);
+    } else if (decoded.role === 'driver') {
+      userOrders = orders.filter(o => o.livreurId === decoded.id || o.status === 'pending');
+    } else if (decoded.role === 'pharmacist') {
+      const pharmacist = users.find(u => u.id === decoded.id);
+      userOrders = orders.filter(o => o.pharmacyId === pharmacist.pharmacyId);
+    }
+
+    res.json({ success: true, orders: userOrders });
+  } catch (error) {
+    res.status(401).json({ success: false, message: 'Token invalide' });
+  }
+});
+
+// Détail d'une commande
+app.get('/api/orders/:id', (req, res) => {
+  const order = orders.find(o => o.id === req.params.id);
+  
+  if (!order) {
+    return res.status(404).json({
+      success: false,
+      message: 'Commande non trouvée'
+    });
+  }
+  
+  // Enrichir avec les infos
+  const client = users.find(u => u.id === order.clientId);
+  const pharmacy = pharmacies.find(p => p.id === order.pharmacyId);
+  const livreur = order.livreurId ? users.find(u => u.id === order.livreurId) : null;
+  
+  res.json({
+    success: true,
+    order: {
+      ...order,
+      client: client ? {
+        name: `${client.firstName} ${client.lastName}`,
+        phone: client.phone,
+        avatar: client.avatar
+      } : null,
+      pharmacy: pharmacy ? {
+        name: pharmacy.name,
+        phone: pharmacy.phone,
+        address: pharmacy.address
+      } : null,
+      livreur: livreur ? {
+        name: `${livreur.firstName} ${livreur.lastName}`,
+        phone: livreur.phone,
+        avatar: livreur.avatar,
+        rating: livreur.rating,
+        vehicle: livreur.vehicle
+      } : null
+    }
+  });
+});
+
+// Créer une commande
+app.post('/api/orders', (req, res) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+  
+  if (!token) {
+    return res.status(401).json({ success: false, message: 'Non autorisé' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret-dev-key');
+    
+    const newOrder = {
+      id: String(orders.length + 1),
+      orderNumber: 'CMD' + String(orders.length + 1).padStart(3, '0'),
+      clientId: decoded.id,
+      ...req.body,
+      status: 'pending',
+      createdAt: new Date()
+    };
+    
+    orders.push(newOrder);
+    
+    // Notifier via Socket.IO
+    io.emit('new:order', newOrder);
+    
+    // Créer notification pour livreurs disponibles
+    const availableDrivers = users.filter(u => u.role === 'driver' && u.isAvailable);
+    availableDrivers.forEach(driver => {
+      const notification = {
+        id: String(notifications.length + 1),
+        userId: driver.id,
+        title: 'Nouvelle commande',
+        message: `Nouvelle commande ${newOrder.orderNumber} disponible`,
+        type: 'order',
+        isRead: false,
+        createdAt: new Date()
+      };
+      notifications.push(notification);
+      io.to(driver.id).emit('new:notification', notification);
+    });
+    
+    res.status(201).json({ success: true, order: newOrder });
+  } catch (error) {
+    res.status(401).json({ success: false, message: 'Token invalide' });
+  }
+});
+
+// Mettre à jour le statut d'une commande
+app.put('/api/orders/:id/status', (req, res) => {
+  const order = orders.find(o => o.id === req.params.id);
+  
+  if (!order) {
+    return res.status(404).json({
+      success: false,
+      message: 'Commande non trouvée'
+    });
+  }
+  
+  const { status } = req.body;
+  order.status = status;
+  
+  if (status === 'accepted') {
+    order.acceptedAt = new Date();
+  } else if (status === 'delivered') {
+    order.deliveredAt = new Date();
+  }
+  
+  // Notifier via Socket.IO
+  io.emit(`order:${order.id}:status`, { orderId: order.id, status });
+  
+  // Notifier le client
+  const notification = {
+    id: String(notifications.length + 1),
+    userId: order.clientId,
+    title: 'Mise à jour commande',
+    message: `Votre commande ${order.orderNumber} est ${status}`,
+    type: 'order',
+    isRead: false,
+    createdAt: new Date()
+  };
+  notifications.push(notification);
+  io.to(order.clientId).emit('new:notification', notification);
+  
+  res.json({ success: true, order });
+});
+
+// =====================================================
+// ROUTES LIVRAISONS
+// =====================================================
+
+// Liste des livraisons
+app.get('/api/deliveries', (req, res) => {
+  res.json({ success: true, deliveries });
+});
+
+// Accepter une livraison
+app.post('/api/deliveries/:id/accept', (req, res) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+  
+  if (!token) {
+    return res.status(401).json({ success: false, message: 'Non autorisé' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret-dev-key');
+    
+    const order = orders.find(o => o.id === req.params.id);
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Commande non trouvée'
+      });
+    }
+    
+    order.livreurId = decoded.id;
+    order.status = 'accepted';
+    order.acceptedAt = new Date();
+    
+    const newDelivery = {
+      id: String(deliveries.length + 1),
+      orderId: order.id,
+      livreurId: decoded.id,
+      status: 'accepted',
+      currentLocation: order.pharmacyLocation,
+      startLocation: order.pharmacyLocation,
+      endLocation: order.deliveryLocation,
+      estimatedTime: order.estimatedDeliveryTime,
+      distance: 0,
+      startedAt: new Date(),
+      completedAt: null
+    };
+    
+    deliveries.push(newDelivery);
+    
+    io.emit(`order:${order.id}:accepted`, { orderId: order.id, livreurId: decoded.id });
+    
+    res.json({ success: true, delivery: newDelivery, order });
+  } catch (error) {
+    res.status(401).json({ success: false, message: 'Token invalide' });
+  }
+});
+
+// Mettre à jour la position du livreur
+app.put('/api/deliveries/:id/location', (req, res) => {
+  const delivery = deliveries.find(d => d.id === req.params.id);
+  
+  if (!delivery) {
+    return res.status(404).json({
+      success: false,
+      message: 'Livraison non trouvée'
+    });
+  }
+  
+  delivery.currentLocation = req.body;
+  delivery.status = 'delivering';
+  
+  // Notifier via Socket.IO
+  io.emit(`delivery:${delivery.orderId}:location`, req.body);
+  
+  // Mettre à jour la commande
+  const order = orders.find(o => o.id === delivery.orderId);
+  if (order) {
+    order.status = 'delivering';
+  }
+  
+  res.json({ success: true, delivery });
+});
+
+// Terminer une livraison
+app.post('/api/deliveries/:id/complete', (req, res) => {
+  const delivery = deliveries.find(d => d.id === req.params.id);
+  
+  if (!delivery) {
+    return res.status(404).json({
+      success: false,
+      message: 'Livraison non trouvée'
+    });
+  }
+  
+  delivery.status = 'completed';
+  delivery.completedAt = new Date();
+  
+  const order = orders.find(o => o.id === delivery.orderId);
+  if (order) {
+    order.status = 'delivered';
+    order.deliveredAt = new Date();
+    
+    // Ajouter une transaction au portefeuille du livreur
+    const deliveryFee = order.deliveryFee * 0.8; // 80% pour le livreur
+    const transaction = {
+      id: String(transactions.length + 1),
+      userId: delivery.livreurId,
+      type: 'earning',
+      amount: deliveryFee,
+      description: `Livraison ${order.orderNumber}`,
+      date: new Date(),
+      status: 'completed'
+    };
+    transactions.push(transaction);
+    
+    // Mettre à jour les gains du livreur
+    const driver = users.find(u => u.id === delivery.livreurId);
+    if (driver) {
+      driver.earnings = (driver.earnings || 0) + deliveryFee;
+      driver.totalDeliveries = (driver.totalDeliveries || 0) + 1;
+    }
+  }
+  
+  io.emit(`delivery:${delivery.orderId}:completed`, { deliveryId: delivery.id });
+  
+  res.json({ success: true, delivery, order });
+});
+
+// =====================================================
+// ROUTES PORTEFEUILLE
+// =====================================================
+
+// Balance du portefeuille
+app.get('/api/wallet/balance', (req, res) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+  
+  if (!token) {
+    return res.status(401).json({ success: false, message: 'Non autorisé' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret-dev-key');
+    const user = users.find(u => u.id === decoded.id);
+    
+    if (!user || user.role !== 'driver') {
+      return res.status(403).json({
+        success: false,
+        message: 'Accès refusé'
+      });
+    }
+    
+    res.json({
+      success: true,
+      balance: user.earnings || 0,
+      totalDeliveries: user.totalDeliveries || 0,
+      level: user.level || 'Bronze'
+    });
+  } catch (error) {
+    res.status(401).json({ success: false, message: 'Token invalide' });
+  }
+});
+
+// Transactions du portefeuille
+app.get('/api/wallet/transactions', (req, res) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+  
+  if (!token) {
+    return res.status(401).json({ success: false, message: 'Non autorisé' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret-dev-key');
+    const userTransactions = transactions.filter(t => t.userId === decoded.id);
+    
+    res.json({
+      success: true,
+      transactions: userTransactions.sort((a, b) => new Date(b.date) - new Date(a.date))
+    });
+  } catch (error) {
+    res.status(401).json({ success: false, message: 'Token invalide' });
+  }
+});
+
+// Demande de retrait
+app.post('/api/wallet/withdraw', (req, res) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+  
+  if (!token) {
+    return res.status(401).json({ success: false, message: 'Non autorisé' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret-dev-key');
+    const user = users.find(u => u.id === decoded.id);
+    
+    if (!user || user.role !== 'driver') {
+      return res.status(403).json({
+        success: false,
+        message: 'Accès refusé'
+      });
+    }
+    
+    const { amount, method } = req.body;
+    
+    if (amount > user.earnings) {
+      return res.status(400).json({
+        success: false,
+        message: 'Solde insuffisant'
+      });
+    }
+    
+    const transaction = {
+      id: String(transactions.length + 1),
+      userId: user.id,
+      type: 'withdrawal',
+      amount: -amount,
+      description: `Retrait ${method}`,
+      date: new Date(),
+      status: 'pending'
+    };
+    
+    transactions.push(transaction);
+    user.earnings -= amount;
+    
+    res.json({
+      success: true,
+      transaction,
+      newBalance: user.earnings
+    });
+  } catch (error) {
+    res.status(401).json({ success: false, message: 'Token invalide' });
+  }
+});
+
+// =====================================================
+// ROUTES NOTIFICATIONS
+// =====================================================
+
+// Liste des notifications
+app.get('/api/notifications', (req, res) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+  
+  if (!token) {
+    return res.status(401).json({ success: false, message: 'Non autorisé' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret-dev-key');
+    const userNotifications = notifications
+      .filter(n => n.userId === decoded.id)
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    
+    res.json({
+      success: true,
+      notifications: userNotifications
+    });
+  } catch (error) {
+    res.status(401).json({ success: false, message: 'Token invalide' });
+  }
+});
+
+// Marquer une notification comme lue
+app.put('/api/notifications/:id/read', (req, res) => {
+  const notification = notifications.find(n => n.id === req.params.id);
+  
+  if (!notification) {
+    return res.status(404).json({
+      success: false,
+      message: 'Notification non trouvée'
+    });
+  }
+  
+  notification.isRead = true;
+  
+  res.json({ success: true, notification });
+});
+
+// =====================================================
+// SOCKET.IO - TEMPS RÉEL
+// =====================================================
+const connectedUsers = new Map();
+
+io.on('connection', (socket) => {
+  console.log('✅ Client connecté:', socket.id);
+
+  // Enregistrer l'utilisateur
+  socket.on('user:register', (data) => {
+    connectedUsers.set(data.userId, socket.id);
+    socket.join(data.userId);
+    console.log(`👤 User ${data.userId} joined room`);
+  });
+
+  // Position du livreur
+  socket.on('driver:location', (data) => {
+    console.log('📍 Driver location:', data);
+    
+    // Mettre à jour la livraison
+    const delivery = deliveries.find(d => d.livreurId === data.driverId && d.status !== 'completed');
+    if (delivery) {
+      delivery.currentLocation = data.location;
+      
+      // Notifier le client de la commande
+      const order = orders.find(o => o.id === delivery.orderId);
+      if (order) {
+        io.to(order.clientId).emit('location:update', {
+          orderId: order.id,
+          location: data.location,
+          estimatedTime: data.estimatedTime || delivery.estimatedTime
+        });
+      }
+    }
+    
+    // Broadcast à tous les autres
+    socket.broadcast.emit('location:update', data);
+  });
+
+  // Nouveau message
+  socket.on('message:send', (data) => {
+    const { orderId, senderId, message } = data;
+    const order = orders.find(o => o.id === orderId);
+    
+    if (order) {
+      // Envoyer au client
+      io.to(order.clientId).emit('message:received', data);
+      
+      // Envoyer au livreur
+      if (order.livreurId) {
+        io.to(order.livreurId).emit('message:received', data);
+      }
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log('❌ Client déconnecté:', socket.id);
+    
+    // Retirer de la map
+    for (const [userId, socketId] of connectedUsers.entries()) {
+      if (socketId === socket.id) {
+        connectedUsers.delete(userId);
+        break;
+      }
+    }
+  });
+});
+
+// =====================================================
+// DÉMARRAGE DU SERVEUR
+// =====================================================
+const PORT = process.env.PORT || 5000;
+
+server.listen(PORT, '0.0.0.0', () => {
+  console.log('');
+  console.log('========================================');
+  console.log(`🚀 PHARMALIVRAISON API DÉMARRÉE`);
+  console.log('========================================');
+  console.log('');
+  console.log(`📡 API: http://localhost:${PORT}`);
+  console.log(`📡 LAN: http://192.168.1.5:${PORT}`);
+  console.log('🔌 Socket.IO: actif');
+  console.log('');
+  console.log('📊 STATISTIQUES:');
+  console.log(`   👥 Utilisateurs: ${users.length}`);
+  console.log(`   🏥 Pharmacies: ${pharmacies.length}`);
+  console.log(`   💊 Médicaments: ${medications.length}`);
+  console.log(`   📦 Commandes: ${orders.length}`);
+  console.log(`   🚚 Livraisons: ${deliveries.length}`);
+  console.log('');
+  console.log(`🔗 Test: http://localhost:${PORT}/api/health`);
+  console.log('');
+});

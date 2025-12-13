@@ -1,0 +1,816 @@
+/* Interface Client Ultra Moderne 2025 */
+
+.client-home-ultra {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #F9FAFB 0%, #E5E7EB 100%);
+  overflow: hidden;
+  position: relative;
+}
+
+/* HEADER GLASSMORPHISM */
+.header-glass {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.btn-glass-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.btn-glass-circle:hover {
+  background: rgba(255, 255, 255, 0.35);
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.btn-glass-circle:active {
+  transform: scale(0.95);
+}
+
+.icon-back, .icon-locate {
+  display: block;
+  transition: transform 0.3s;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* BADGE LOCALISATION MODERNE */
+.location-badge-modern {
+  flex: 1;
+  margin: 0 12px;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.location-icon {
+  font-size: 24px;
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+.location-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.location-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6B7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.location-subtitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1F2937;
+}
+
+/* CARTE ULTRA MODERNE */
+.ultra-map-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.map-tiles {
+  filter: saturate(1.1) contrast(1.05);
+}
+
+/* COMPTEUR PHARMACIES MODERNE */
+.pharmacy-counter-modern {
+  position: absolute;
+  top: 90px;
+  right: 16px;
+  z-index: 1000;
+  width: 90px;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.counter-pulse {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #10B981;
+  opacity: 0.2;
+  animation: pulse-ring 2s infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+}
+
+.counter-content {
+  position: relative;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+}
+
+.counter-number {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.counter-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.9;
+}
+
+/* BOUTON LOCALISATION FLOTTANT */
+.btn-locate-floating {
+  position: absolute;
+  bottom: 100px;
+  right: 16px;
+  z-index: 1000;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-locate-floating:hover {
+  transform: scale(1.1) rotate(90deg);
+  box-shadow: 0 12px 32px rgba(59, 130, 246, 0.5);
+}
+
+.btn-locate-floating:active {
+  transform: scale(0.95);
+}
+
+/* BARRE D'ACTIONS ULTRA MODERNE */
+.actions-bar-ultra {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1001;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  gap: 12px;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.action-btn-ultra {
+  flex: 1;
+  padding: 16px;
+  border: none;
+  border-radius: 20px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.action-btn-ultra.secondary {
+  background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%);
+  color: #1F2937;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.action-btn-ultra.primary {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35);
+}
+
+.action-btn-ultra:hover {
+  transform: translateY(-4px);
+}
+
+.action-btn-ultra.primary:hover {
+  box-shadow: 0 12px 32px rgba(16, 185, 129, 0.45);
+}
+
+.action-btn-ultra:active {
+  transform: translateY(-2px);
+}
+
+.btn-icon-ultra {
+  font-size: 28px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.btn-text {
+  font-size: 14px;
+  letter-spacing: 0.3px;
+}
+
+.btn-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+  transform: translate(-50%, -50%) scale(0);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.action-btn-ultra.primary:active .btn-glow {
+  animation: glow-pulse 0.6s ease-out;
+}
+
+@keyframes glow-pulse {
+  to {
+    transform: translate(-50%, -50%) scale(3);
+    opacity: 0;
+  }
+}
+
+/* POPUP COMMANDE ULTRA MODERNE */
+.order-popup-ultra {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  z-index: 2000;
+  display: flex;
+  align-items: flex-end;
+  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.popup-sheet {
+  width: 100%;
+  max-height: 90vh;
+  background: white;
+  border-radius: 32px 32px 0 0;
+  padding: 24px;
+  overflow-y: auto;
+  animation: slideUpSheet 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+@keyframes slideUpSheet {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.sheet-handle {
+  width: 40px;
+  height: 5px;
+  background: #E5E7EB;
+  border-radius: 3px;
+  margin: 0 auto 20px;
+}
+
+.btn-close-modern {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #F3F4F6;
+  border: none;
+  font-size: 20px;
+  color: #6B7280;
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 10;
+}
+
+.btn-close-modern:hover {
+  background: #E5E7EB;
+  transform: rotate(90deg);
+}
+
+/* HEADER PHARMACIE MODERNE */
+.pharmacy-header-modern {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 32px;
+  padding: 20px;
+  background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+  border-radius: 24px;
+  border: 2px solid #BBF7D0;
+}
+
+.pharmacy-icon-large {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+}
+
+.pharmacy-info {
+  flex: 1;
+}
+
+.pharmacy-name {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: #1F2937;
+  line-height: 1.2;
+}
+
+.pharmacy-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.meta-badge, .meta-distance, .meta-rating {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.meta-badge.open {
+  background: #D1FAE5;
+  color: #059669;
+}
+
+.meta-distance {
+  background: #DBEAFE;
+  color: #1E40AF;
+}
+
+.meta-rating {
+  background: #FEF3C7;
+  color: #D97706;
+}
+
+/* SECTIONS MODERNES */
+.section-modern {
+  margin-bottom: 24px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1F2937;
+}
+
+.title-icon {
+  font-size: 22px;
+}
+
+/* GRID LOCALISATIONS */
+.locations-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.location-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  background: white;
+  border: 2px solid #E5E7EB;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.location-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.location-card.selected {
+  border-color: #10B981;
+  background: #F0FDF4;
+  transform: scale(1.02);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.2);
+}
+
+.location-card:hover {
+  border-color: #10B981;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.card-icon {
+  font-size: 32px;
+  min-width: 40px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.card-content {
+  flex: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.card-title {
+  margin: 0 0 4px 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1F2937;
+}
+
+.card-subtitle {
+  margin: 0;
+  font-size: 13px;
+  color: #6B7280;
+}
+
+.check-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  position: relative;
+  z-index: 1;
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+/* INPUT MODERNE */
+.input-modern {
+  width: 100%;
+  padding: 16px;
+  border: 2px solid #E5E7EB;
+  border-radius: 16px;
+  font-size: 15px;
+  font-family: inherit;
+  resize: none;
+  transition: all 0.3s;
+  background: #F9FAFB;
+}
+
+.input-modern:focus {
+  outline: none;
+  border-color: #10B981;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+  transform: translateY(-2px);
+}
+
+/* UPLOAD MODERNE */
+.upload-modern {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%);
+  border-radius: 16px;
+  cursor: pointer;
+  margin-top: 12px;
+  transition: all 0.3s;
+  border: 2px dashed #CBD5E1;
+}
+
+.upload-modern:hover {
+  background: linear-gradient(135deg, #E5E7EB 0%, #D1D5DB 100%);
+  border-color: #10B981;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.upload-icon {
+  font-size: 24px;
+}
+
+.upload-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+/* BOUTON CONFIRMER ULTRA */
+.btn-confirm-ultra {
+  width: 100%;
+  padding: 18px 24px;
+  border: none;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: white;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 24px 0 16px;
+  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.35);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-confirm-ultra::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-confirm-ultra:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.btn-confirm-ultra:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(16, 185, 129, 0.45);
+}
+
+.btn-confirm-ultra:active {
+  transform: translateY(-2px);
+}
+
+.btn-confirm-text, .btn-confirm-icon {
+  position: relative;
+  z-index: 1;
+}
+
+.btn-confirm-icon {
+  font-size: 20px;
+  transition: transform 0.3s;
+}
+
+.btn-confirm-ultra:hover .btn-confirm-icon {
+  transform: translateX(4px);
+}
+
+/* HINT */
+.popup-hint {
+  text-align: center;
+  font-size: 13px;
+  color: #6B7280;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* POPUP MODERNE SUR LA CARTE */
+.modern-popup .leaflet-popup-content-wrapper {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  border: 2px solid #F0FDF4;
+  padding: 0;
+  overflow: hidden;
+}
+
+.modern-popup .leaflet-popup-content {
+  margin: 0;
+  width: auto !important;
+}
+
+.modern-popup .leaflet-popup-tip {
+  background: white;
+  border: 2px solid #F0FDF4;
+  border-top: none;
+  border-right: none;
+}
+
+.popup-content-modern {
+  padding: 16px;
+  min-width: 220px;
+}
+
+.popup-title {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1F2937;
+}
+
+.popup-badge-open {
+  display: inline-block;
+  padding: 4px 12px;
+  background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
+  color: #047857;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.popup-address {
+  font-size: 13px;
+  color: #6B7280;
+  margin: 8px 0;
+}
+
+.popup-stats {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.stat-icon {
+  font-size: 14px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .header-glass {
+    padding: 12px;
+  }
+  
+  .btn-glass-circle {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .pharmacy-counter-modern {
+    top: 80px;
+    right: 12px;
+  }
+  
+  .actions-bar-ultra {
+    padding: 16px;
+  }
+}
+
+/* ANIMATIONS D'ENTRÉE */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pharmacy-header-modern {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.section-modern:nth-child(2) {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.section-modern:nth-child(3) {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.btn-confirm-ultra {
+  animation: fadeInUp 0.7s ease-out;
+}
+

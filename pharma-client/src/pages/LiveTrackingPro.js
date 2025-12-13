@@ -29,7 +29,7 @@ function LiveTrackingPro() {
   const [eta, setEta] = useState(8);
   const [distance, setDistance] = useState(1.2);
   const [status, setStatus] = useState('En route vers vous');
-  const [isConnected, setIsConnected] = useState(false);
+  const [, setIsConnected] = useState(false);
   
   const [driverInfo, setDriverInfo] = useState({
     name: 'Mohamed K.',

@@ -6,7 +6,7 @@ function EmergencyMode() {
   const navigate = useNavigate();
   const [sosActive, setSosActive] = useState(false);
   const [countdown, setCountdown] = useState(5);
-  const [emergencyContact, setEmergencyContact] = useState(null);
+  const [, setEmergencyContact] = useState(null);
 
   const contacts = [
     { id: 1, name: 'Maman', phone: '+225 07 12 34 56 78', relation: 'Famille' },

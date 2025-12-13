@@ -31,7 +31,7 @@ const createPharmacyIcon = () => L.divIcon({
 });
 
 function ClientHomeUltra() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [userPosition, setUserPosition] = useState([5.3600, -4.0083]); // Abidjan par défaut
   const [nearbyPharmacies, setNearbyPharmacies] = useState([]);
   const [locationName] = useState('Cocody, Abidjan');

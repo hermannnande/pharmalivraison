@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -67,8 +67,15 @@ function LiveTracking() {
   const [deliveryStatus, setDeliveryStatus] = useState('En route vers la pharmacie');
   const [progress, setProgress] = useState(15);
 
-  const pharmacyPosition = pharmacie?.position ? [pharmacie.position.lat, pharmacie.position.lng] : [5.3400, -4.0000];
-  const clientPosition = userLocation?.coordinates || [5.3200, -4.0300];
+  const pharmacyPosition = useMemo(() => 
+    pharmacie?.position ? [pharmacie.position.lat, pharmacie.position.lng] : [5.3400, -4.0000],
+    [pharmacie]
+  );
+  
+  const clientPosition = useMemo(() => 
+    userLocation?.coordinates || [5.3200, -4.0300],
+    [userLocation]
+  );
 
   // Simulation du mouvement du livreur
   useEffect(() => {

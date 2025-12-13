@@ -118,6 +118,20 @@ class SocketService {
     }
   }
 
+  // Méthode générique pour écouter n'importe quel événement
+  on(eventName, callback) {
+    if (!this.socket) this.connect();
+    
+    this.socket.on(eventName, callback);
+    this.listeners.set(eventName, callback);
+  }
+
+  // Méthode générique pour émettre n'importe quel événement
+  emit(eventName, data) {
+    if (!this.socket) this.connect();
+    this.socket.emit(eventName, data);
+  }
+
   // Retirer tous les écouteurs
   offAll() {
     if (this.socket) {

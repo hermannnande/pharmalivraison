@@ -69,6 +69,7 @@ function ClientHomeUltra() {
     setNearbyPharmacies(pharmacies);
 
     // Connecter Socket.IO et écouter les événements d'acceptation
+    console.log('🔌 [CLIENT] Initialisation Socket.IO...');
     socketService.connect();
 
     // Écouter les acceptations de commande
@@ -89,9 +90,18 @@ function ClientHomeUltra() {
 
     // Note: Nous écouterons un événement générique car nous ne connaissons pas l'ID
     // à l'avance. Alternative: écouter tous les événements ou stocker l'orderId
+    console.log('👂 [CLIENT] Ecoute de l\'événement "order:accepted"...');
     socketService.on('order:accepted', handleOrderAccepted);
 
+    // Test: Ajouter aussi un écouteur pour TOUS les événements
+    if (socketService.socket) {
+      socketService.socket.onAny((eventName, ...args) => {
+        console.log(`📩 [CLIENT] Événement reçu: ${eventName}`, args);
+      });
+    }
+
     return () => {
+      console.log('🔌 [CLIENT] Nettoyage Socket.IO...');
       socketService.off('order:accepted');
     };
   }, []);

@@ -116,6 +116,8 @@ function DriverDelivery() {
       // Arrêter le suivi quand le composant est démonté
       socketService.stopLocationTracking();
     };
+  }, [orderId, deliveryStatus]);
+
   // Calculer la distance
   const calculateDistance = () => {
     let target = deliveryStatus === 'to-pharmacy' || deliveryStatus === 'at-pharmacy' 

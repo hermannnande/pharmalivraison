@@ -15,6 +15,9 @@ const io = socketIO(server, {
 app.use(cors());
 app.use(express.json());
 
+// Attacher Socket.IO à l'app Express pour que les routes y accèdent
+app.set('io', io);
+
 // =====================================================
 // MIDDLEWARE D'AUTHENTIFICATION
 // =====================================================

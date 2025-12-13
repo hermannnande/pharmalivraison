@@ -131,6 +131,15 @@ export const acceptDelivery = async (orderId) => {
   }
 };
 
+export const pickupDelivery = async (orderId) => {
+  try {
+    const response = await api.put(`/deliveries/${orderId}/pickup`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Erreur lors de la récupération du colis' };
+  }
+};
+
 export const updateDeliveryLocation = async (deliveryId, location) => {
   try {
     const response = await api.put(`/deliveries/${deliveryId}/location`, location);

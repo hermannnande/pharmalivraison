@@ -51,6 +51,25 @@ class SocketService {
 
   // ==================== ÉVÉNEMENTS LIVREUR ====================
 
+  // Méthode générique pour écouter n'importe quel événement
+  on(eventName, callback) {
+    if (!this.socket) this.connect();
+    
+    this.socket.on(eventName, callback);
+    this.listeners.set(eventName, callback);
+  }
+
+  // Méthode générique pour émettre n'importe quel événement
+  emit(eventName, data) {
+    if (!this.socket) this.connect();
+    
+    if (this.socket?.connected) {
+      this.socket.emit(eventName, data);
+    } else {
+      console.warn(`⚠️ Socket non connecté, impossible d'émettre: ${eventName}`);
+    }
+  }
+
   // Écouter les nouvelles commandes disponibles
   onNewDelivery(callback) {
     if (!this.socket) this.connect();

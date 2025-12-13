@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { createOrder } from '../services/api';
+import socketService from '../services/socket';
 import './OrderModal.css';
 
 function OrderModal({ isOpen, onClose }) {
@@ -12,7 +14,7 @@ function OrderModal({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!selectedOption) {
@@ -22,7 +24,6 @@ function OrderModal({ isOpen, onClose }) {
     
     // Créer l'objet commande
     const orderData = {
-      id: `CMD-${Date.now()}`,
       orderType: selectedOption,
       medicationList: selectedOption === 'liste' ? medicationList : '',
       symptoms: selectedOption === 'symptomes' ? symptoms : '',
@@ -30,39 +31,49 @@ function OrderModal({ isOpen, onClose }) {
       forOther: forOther,
       recipientName: forOther ? recipientName : '',
       recipientPhone: forOther ? recipientPhone : '',
-      timestamp: new Date().toISOString(),
-      status: 'waiting'
+      pharmacyId: '1', // TODO: Récupérer depuis la pharmacie sélectionnée
+      deliveryAddress: 'Cocody Angré, 7ème Tranche', // TODO: Récupérer depuis le profil utilisateur
+      deliveryLocation: { lat: 5.3650, lng: -4.0100 }, // TODO: GPS utilisateur
+      pharmacyLocation: { lat: 5.3680, lng: -4.0120 }
     };
 
-    // Simuler l'envoi de la commande
-    console.log('Commande créée:', orderData);
-    
-    // Message de succès moderne
-    const modal = document.createElement('div');
-    modal.className = 'success-modal-custom';
-    modal.innerHTML = `
-      <div class="success-card-custom">
-        <div class="success-icon-custom">✅</div>
-        <h3>Commande envoyée !</h3>
-        <p>Un livreur proche de votre position va être assigné automatiquement.</p>
-        <div class="success-loader"></div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-    
-    setTimeout(() => {
-      modal.remove();
-      onClose();
-    }, 3000);
-    
-    // Reset
-    setSelectedOption(null);
-    setMedicationList('');
-    setSymptoms('');
-    setNotes('');
-    setForOther(false);
-    setRecipientName('');
-    setRecipientPhone('');
+    try {
+      // Envoyer la commande au backend
+      console.log('📤 Envoi de la commande au backend...', orderData);
+      const response = await createOrder(orderData);
+      console.log('✅ Commande créée:', response);
+      
+      // Message de succès moderne
+      const modal = document.createElement('div');
+      modal.className = 'success-modal-custom';
+      modal.innerHTML = `
+        <div class="success-card-custom">
+          <div class="success-icon-custom">✅</div>
+          <h3>Commande envoyée !</h3>
+          <p>Commande N° ${response.order.orderNumber}</p>
+          <p>Un livreur proche de votre position va être assigné automatiquement.</p>
+          <div class="success-loader"></div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      
+      setTimeout(() => {
+        modal.remove();
+        onClose();
+      }, 3000);
+      
+      // Reset
+      setSelectedOption(null);
+      setMedicationList('');
+      setSymptoms('');
+      setNotes('');
+      setForOther(false);
+      setRecipientName('');
+      setRecipientPhone('');
+    } catch (error) {
+      console.error('❌ Erreur lors de la création de la commande:', error);
+      alert('Erreur lors de l\'envoi de la commande. Veuillez réessayer.');
+    }
   };
 
   const handlePhotoClick = () => {

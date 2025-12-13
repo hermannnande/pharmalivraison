@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getAvailableDeliveries, acceptDelivery } from '../services/api';
+import socketService from '../services/socket';
 import './LivreurDashboard.css';
 
 const LivreurDashboard = () => {
@@ -30,15 +32,110 @@ const LivreurDashboard = () => {
 
   const [showOrderDetails, setShowOrderDetails] = useState(null);
 
-  const handleAcceptOrder = (orderId) => {
-    setOrders(orders.map(order => 
-      order.id === orderId 
-        ? { ...order, status: 'accepted' }
-        : order
-    ));
-    setShowOrderDetails(null);
-    // Naviguer vers la page de livraison
-    navigate('/driver-delivery', { state: { orderId } });
+  // Charger les commandes disponibles au montage
+  useEffect(() => {
+    const loadOrders = async () => {
+      try {
+        const response = await getAvailableDeliveries();
+        if (response.deliveries && response.deliveries.length > 0) {
+          // Convertir les commandes du backend au format de l'interface
+          const formattedOrders = response.deliveries.map(order => ({
+            id: order.id,
+            orderNumber: order.orderNumber,
+            clientName: 'Client', // TODO: Récupérer le nom du client
+            clientPhone: order.deliveryPhone || '+225 XX XX XX XX XX',
+            clientAddress: order.deliveryAddress,
+            clientPosition: [order.deliveryLocation?.lat || 5.3600, order.deliveryLocation?.lng || -4.0083],
+            pharmacyName: 'Pharmacie', // TODO: Récupérer le nom de la pharmacie
+            pharmacyAddress: order.pharmacyAddress || 'Adresse pharmacie',
+            pharmacyPosition: [order.pharmacyLocation?.lat || 5.3500, order.pharmacyLocation?.lng || -4.0150],
+            orderType: order.orderType || 'ordonnance',
+            orderDetails: order.medicationList || order.symptoms || order.notes || 'Détails de la commande',
+            estimatedPrice: `${order.totalPrice || 0} FCFA`,
+            deliveryFee: `${order.deliveryFee || 1000} FCFA`,
+            estimatedTime: `${order.estimatedDeliveryTime || 25}-35 min`,
+            status: 'waiting',
+            timestamp: new Date(order.createdAt).toLocaleTimeString('fr-FR'),
+            forOther: order.forOther || false,
+            urgentOrder: order.isUrgent || false
+          }));
+          setOrders(formattedOrders);
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des commandes:', error);
+      }
+    };
+
+    loadOrders();
+
+    // Écouter les nouvelles commandes via Socket.IO
+    socketService.connect();
+    
+    const handleNewOrder = (order) => {
+      console.log('🔔 Nouvelle commande reçue:', order);
+      
+      // Ajouter la nouvelle commande à la liste
+      const newOrder = {
+        id: order.id,
+        orderNumber: order.orderNumber,
+        clientName: 'Client',
+        clientPhone: order.deliveryPhone || '+225 XX XX XX XX XX',
+        clientAddress: order.deliveryAddress,
+        clientPosition: [order.deliveryLocation?.lat || 5.3600, order.deliveryLocation?.lng || -4.0083],
+        pharmacyName: 'Pharmacie',
+        pharmacyAddress: order.pharmacyAddress || 'Adresse pharmacie',
+        pharmacyPosition: [order.pharmacyLocation?.lat || 5.3500, order.pharmacyLocation?.lng || -4.0150],
+        orderType: order.orderType || 'ordonnance',
+        orderDetails: order.medicationList || order.symptoms || order.notes || 'Détails de la commande',
+        estimatedPrice: `${order.totalPrice || 0} FCFA`,
+        deliveryFee: `${order.deliveryFee || 1000} FCFA`,
+        estimatedTime: `${order.estimatedDeliveryTime || 25}-35 min`,
+        status: 'waiting',
+        timestamp: new Date().toLocaleTimeString('fr-FR'),
+        forOther: order.forOther || false,
+        urgentOrder: order.isUrgent || false
+      };
+
+      setOrders(prev => [newOrder, ...prev]);
+
+      // Notification sonore (optionnelle)
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('Nouvelle commande !', {
+          body: `Commande ${order.orderNumber} disponible`,
+          icon: '/logo192.png'
+        });
+      }
+    };
+
+    socketService.on('new:order', handleNewOrder);
+
+    return () => {
+      socketService.off('new:order');
+    };
+  }, []);
+
+  const handleAcceptOrder = async (orderId) => {
+    try {
+      console.log('📤 Acceptation de la commande:', orderId);
+      
+      // Appeler l'API pour accepter la livraison
+      const response = await acceptDelivery(orderId);
+      console.log('✅ Commande acceptée:', response);
+      
+      // Mettre à jour localement
+      setOrders(orders.map(order => 
+        order.id === orderId 
+          ? { ...order, status: 'accepted' }
+          : order
+      ));
+      setShowOrderDetails(null);
+      
+      // Naviguer vers la page de livraison
+      navigate('/driver-delivery', { state: { orderId } });
+    } catch (error) {
+      console.error('❌ Erreur lors de l\'acceptation:', error);
+      alert('Erreur lors de l\'acceptation de la commande. Veuillez réessayer.');
+    }
   };
 
   const handleRejectOrder = (orderId) => {

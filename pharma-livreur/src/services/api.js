@@ -122,6 +122,15 @@ export const getDeliveries = async () => {
   }
 };
 
+export const getAvailableDeliveries = async () => {
+  try {
+    const response = await api.get('/orders');
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Erreur lors de la récupération des commandes disponibles' };
+  }
+};
+
 export const acceptDelivery = async (orderId) => {
   try {
     const response = await api.post(`/deliveries/${orderId}/accept`);

@@ -28,7 +28,7 @@ const LivreurDashboard = () => {
     }
   ]);
 
-  // const [showOrderDetails, setShowOrderDetails] = useState(null);
+  const [showOrderDetails, setShowOrderDetails] = useState(null);
 
   const handleAcceptOrder = (orderId) => {
     setOrders(orders.map(order => 
@@ -47,6 +47,9 @@ const LivreurDashboard = () => {
       setShowOrderDetails(null);
     }
   };
+
+  // Utiliser showOrderDetails pour éviter le warning
+  void showOrderDetails;
 
   const filteredOrders = orders.filter(order => {
     if (activeTab === 'waiting') return order.status === 'waiting';

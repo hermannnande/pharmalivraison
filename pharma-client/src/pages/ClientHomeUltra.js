@@ -81,10 +81,12 @@ function ClientHomeUltra() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [notification, setNotification] = useState(null);
 
-  // États pour le radar de recherche de livreur
+  // États pour le radar de recherche de livreur ET pharmacie
   const [isSearchingCourier, setIsSearchingCourier] = useState(false);
+  const [isSearchingPharmacy, setIsSearchingPharmacy] = useState(false);
   const [searchRadius, setSearchRadius] = useState(5);
   const [searchPharmacyName, setSearchPharmacyName] = useState('');
+  const [searchType, setSearchType] = useState(''); // 'pharmacy' ou 'courier'
   const location = useLocation();
   
   // État pour afficher/cacher la section de suivi
@@ -294,23 +296,61 @@ function ClientHomeUltra() {
     console.log('👂 [CLIENT] Ecoute de l\'événement "order:accepted"...');
     socketService.on('order:accepted', handleOrderAccepted);
 
+    // Écouter les événements de recherche de pharmacie
+    socketService.on('pharmacy:search-started', (data) => {
+      console.log('🔍 Recherche de pharmacie démarrée', data);
+      setIsSearchingPharmacy(true);
+      setSearchType('pharmacy');
+      setSearchRadius(10); // Commence à 10km
+      setSearchPharmacyName('');
+    });
+
+    socketService.on('pharmacy:search-progress', (data) => {
+      console.log('📡 Recherche pharmacie en cours...', data.radius, 'km');
+      setSearchRadius(data.radius);
+    });
+
+    socketService.on('pharmacy:found', (data) => {
+      console.log('✅ Pharmacie trouvée:', data.pharmacy.name);
+      setSearchPharmacyName(data.pharmacy.name);
+      setTimeout(() => {
+        setIsSearchingPharmacy(false);
+        setSearchType('');
+      }, 1500);
+      
+      // Afficher notification
+      setNotification({
+        type: 'success',
+        title: '🏥 Pharmacie trouvée !',
+        message: `${data.pharmacy.name} sélectionnée à ${data.radius} km`,
+        orderId: null,
+        showTrackButton: false
+      });
+      setTimeout(() => setNotification(null), 5000);
+    });
+
     // Écouter les événements de recherche de livreur (avec wildcard pour tous les orderId)
     socketService.on('courier:search-progress', (data) => {
       console.log('🔍 Progression recherche livreur:', data);
       setIsSearchingCourier(true);
+      setSearchType('courier');
       setSearchRadius(data.radius);
       setSearchPharmacyName(data.pharmacyName || 'la pharmacie');
     });
 
     socketService.on('courier:found', (data) => {
       console.log('✅ Livreur trouvé:', data);
-      setIsSearchingCourier(false);
+      setTimeout(() => {
+        setIsSearchingCourier(false);
+        setSearchType('');
+      }, 1500);
       // Notification déjà gérée par order:accepted
     });
 
     socketService.on('courier:not-found', (data) => {
       console.log('❌ Aucun livreur disponible:', data);
       setIsSearchingCourier(false);
+      setSearchType('');
       setNotification({
         type: 'error',
         title: '❌ Aucun livreur disponible',
@@ -530,11 +570,12 @@ function ClientHomeUltra() {
         userPosition={userPosition}
       />
 
-      {/* Radar de recherche de livreur */}
+      {/* Radar de recherche (Pharmacie OU Livreur) */}
       <CourierSearchRadar 
-        isSearching={isSearchingCourier}
+        isSearching={isSearchingPharmacy || isSearchingCourier}
         currentRadius={searchRadius}
-        pharmacyName={searchPharmacyName}
+        pharmacyName={isSearchingPharmacy ? '' : searchPharmacyName}
+        searchType={searchType}
       />
 
       {/* En-tête moderne */}

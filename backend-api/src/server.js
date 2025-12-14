@@ -636,12 +636,23 @@ app.post('/api/orders', async (req, res) => {
       const clientLoc = req.body.deliveryLocation || req.body.clientLocation;
       console.log('🔍 Aucune pharmacie sélectionnée, recherche automatique...');
       
+      // Émettre début de recherche de pharmacie
+      io.emit('pharmacy:search-started', { 
+        clientLocation: clientLoc
+      });
+      
       // Recherche en cascade avec rayons croissants (10km → 12km → 15km)
       const searchRadii = [10000, 12000, 15000]; // en mètres
       let selectedPharmacy = null;
       
       for (const radius of searchRadii) {
         console.log(`   📡 Recherche dans un rayon de ${radius / 1000} km...`);
+        
+        // Émettre progression de recherche
+        io.emit('pharmacy:search-progress', {
+          radius: radius / 1000,
+          clientLocation: clientLoc
+        });
         
         try {
           const result = await placesService.searchPharmacies(
@@ -658,6 +669,17 @@ app.post('/api/orders', async (req, res) => {
             if (openPharmacies.length > 0) {
               selectedPharmacy = openPharmacies[0]; // Prendre la première pharmacie ouverte
               console.log(`   ✅ Pharmacie ouverte trouvée à ${radius / 1000} km`);
+              
+              // Émettre pharmacie trouvée
+              io.emit('pharmacy:found', {
+                pharmacy: {
+                  name: selectedPharmacy.name,
+                  address: selectedPharmacy.address || selectedPharmacy.vicinity,
+                  location: selectedPharmacy.location
+                },
+                radius: radius / 1000
+              });
+              
               break; // Arrêter la recherche
             } else {
               console.log(`   ⚠️ ${result.pharmacies.length} pharmacie(s) trouvée(s) mais toutes fermées`);
@@ -668,6 +690,9 @@ app.post('/api/orders', async (req, res) => {
         } catch (error) {
           console.warn(`   ❌ Erreur recherche à ${radius / 1000} km:`, error.message);
         }
+        
+        // Délai entre chaque recherche pour l'animation
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
       
       // Si aucune pharmacie ouverte trouvée après toutes les tentatives

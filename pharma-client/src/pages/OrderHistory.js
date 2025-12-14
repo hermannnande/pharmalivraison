@@ -1,59 +1,83 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { CONFIG } from '../config';
+import socketService from '../services/socket';
 import './OrderHistory.css';
 
 const OrderHistory = () => {
   const navigate = useNavigate();
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeOrders, setActiveOrders] = useState([]);
+  const [completedOrders, setCompletedOrders] = useState([]);
 
-  // Données de démonstration
-  const [orders] = useState([
-    {
-      id: 'CMD-2025-001',
-      date: '2025-12-10',
-      time: '14:30',
-      type: 'ordonnance',
-      status: 'Livrée',
-      pharmacy: 'Pharmacie du Plateau',
-      total: 12500,
-      items: ['Paracétamol 500mg', 'Amoxicilline 1g', 'Vitamine C'],
-      imageUrl: '/ordonnance-1.jpg',
-      deliveryTime: '35 min'
-    },
-    {
-      id: 'CMD-2025-002',
-      date: '2025-12-08',
-      time: '09:15',
-      type: 'liste',
-      status: 'Livrée',
-      pharmacy: 'Pharmacie de la Gare',
-      total: 8700,
-      items: ['Doliprane', 'Efferalgan', 'Sirop toux'],
-      deliveryTime: '28 min'
-    },
-    {
-      id: 'CMD-2025-003',
-      date: '2025-12-05',
-      time: '18:45',
-      type: 'symptomes',
-      status: 'Livrée',
-      pharmacy: 'Pharmacie des 2 Plateaux',
-      total: 15200,
-      items: ['Traitement fièvre', 'Anti-inflammatoire'],
-      symptoms: 'Fièvre + maux de tête',
-      deliveryTime: '42 min'
-    },
-    {
-      id: 'CMD-2025-004',
-      date: '2025-12-01',
-      time: '11:20',
-      type: 'ordonnance',
-      status: 'Annulée',
-      pharmacy: 'Pharmacie Cocody',
-      total: 0,
-      items: [],
-      imageUrl: '/ordonnance-2.jpg'
+  // Charger les commandes depuis l'API
+  useEffect(() => {
+    loadOrders();
+    
+    // Connecter Socket.IO pour les mises à jour en temps réel
+    socketService.connect();
+    
+    // Écouter les mises à jour de statut
+    socketService.on('order:accepted', (data) => {
+      console.log('✅ Commande acceptée:', data);
+      loadOrders(); // Recharger les commandes
+    });
+    
+    socketService.on('delivery:status', (data) => {
+      console.log('📦 Statut mis à jour:', data);
+      updateOrderStatus(data.orderId, data.status);
+    });
+    
+    return () => {
+      // Nettoyer les listeners
+      socketService.off('order:accepted');
+      socketService.off('delivery:status');
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const loadOrders = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${CONFIG.API_URL}/orders`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (response.data.success) {
+        const allOrders = response.data.orders || [];
+        setOrders(allOrders);
+        
+        // Séparer commandes actives et terminées
+        const active = allOrders.filter(o => 
+          ['pending', 'accepted', 'to-pharmacy', 'at-pharmacy', 'to-client'].includes(o.status)
+        );
+        const completed = allOrders.filter(o => 
+          ['delivered', 'cancelled'].includes(o.status)
+        );
+        
+        setActiveOrders(active);
+        setCompletedOrders(completed);
+      }
+    } catch (error) {
+      console.error('❌ Erreur chargement commandes:', error);
+    } finally {
+      setLoading(false);
     }
-  ]);
+  };
+
+  const updateOrderStatus = (orderId, newStatus) => {
+    setOrders(prevOrders => 
+      prevOrders.map(order => 
+        order.id === orderId ? { ...order, status: newStatus } : order
+      )
+    );
+    
+    // Recharger pour mettre à jour les listes active/completed
+    loadOrders();
+  };
 
   const handleReorder = (order) => {
     // Rediriger vers la page d'accueil avec les données pré-remplies
@@ -68,10 +92,27 @@ const OrderHistory = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Livrée': return '#4caf50';
-      case 'En cours': return '#ff9800';
-      case 'Annulée': return '#f44336';
+      case 'delivered': return '#4caf50';
+      case 'to-pharmacy':
+      case 'at-pharmacy':
+      case 'to-client':
+      case 'accepted': return '#ff9800';
+      case 'pending': return '#2196f3';
+      case 'cancelled': return '#f44336';
       default: return '#9e9e9e';
+    }
+  };
+
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case 'pending': return 'En attente';
+      case 'accepted': return 'Acceptée';
+      case 'to-pharmacy': return 'Vers pharmacie';
+      case 'at-pharmacy': return 'À la pharmacie';
+      case 'to-client': return 'En livraison';
+      case 'delivered': return 'Livrée';
+      case 'cancelled': return 'Annulée';
+      default: return status;
     }
   };
 
@@ -115,109 +156,162 @@ const OrderHistory = () => {
         <div style={{ width: '40px' }}></div>
       </div>
 
+      {/* Loading */}
+      {loading && (
+        <div className="loading-container">
+          <div className="loader"></div>
+          <p>Chargement...</p>
+        </div>
+      )}
+
       {/* Liste des commandes */}
-      <div className="orders-container">
-        {orders.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-icon">📦</div>
-            <h3>Aucune commande</h3>
-            <p>Vos commandes apparaîtront ici</p>
-          </div>
-        ) : (
-          <div className="orders-list">
-            {orders.map((order) => (
-              <div key={order.id} className="order-card">
-                {/* En-tête de la commande */}
-                <div className="order-card-header">
-                  <div className="order-info">
-                    <div className="order-id-row">
-                      {getTypeIcon(order.type)}
-                      <span className="order-id">{order.id}</span>
-                    </div>
-                    <div className="order-date">{order.date} à {order.time}</div>
-                  </div>
-                  <div 
-                    className="order-status-badge" 
-                    style={{ backgroundColor: getStatusColor(order.status) + '20', color: getStatusColor(order.status) }}
-                  >
-                    {order.status}
-                  </div>
-                </div>
-
-                {/* Pharmacie */}
-                <div className="order-pharmacy">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path d="M19.5 9.5C19.5 15.5 12 21 12 21C12 21 4.5 15.5 4.5 9.5C4.5 5.35786 7.85786 2 12 2C16.1421 2 19.5 5.35786 19.5 9.5Z" stroke="#4caf50" strokeWidth="2"/>
-                    <circle cx="12" cy="9.5" r="2.5" fill="#4caf50"/>
-                  </svg>
-                  <span>{order.pharmacy}</span>
-                </div>
-
-                {/* Contenu de la commande */}
-                {order.status !== 'Annulée' && (
-                  <>
-                    {order.type === 'ordonnance' && order.imageUrl && (
-                      <div className="order-prescription">
-                        <div className="prescription-preview">
-                          <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-                            <rect x="4" y="4" width="16" height="16" rx="2" stroke="#2196f3" strokeWidth="2"/>
-                            <path d="M8 11H16M8 15H13" stroke="#2196f3" strokeWidth="2" strokeLinecap="round"/>
-                          </svg>
-                          <span>Ordonnance médicale</span>
+      {!loading && (
+        <div className="orders-container">
+          {/* Commandes en cours */}
+          {activeOrders.length > 0 && (
+            <div className="orders-section">
+              <h2 className="section-title">
+                <span className="pulse-dot"></span>
+                En cours ({activeOrders.length})
+              </h2>
+              <div className="orders-list">
+                {activeOrders.map((order) => (
+                  <div key={order.id} className="order-card active-order">
+                    {/* En-tête de la commande */}
+                    <div className="order-card-header">
+                      <div className="order-info">
+                        <div className="order-id-row">
+                          {getTypeIcon(order.orderType || 'liste')}
+                          <span className="order-id">{order.orderNumber || order.id}</span>
+                        </div>
+                        <div className="order-date">
+                          {new Date(order.createdAt).toLocaleDateString('fr-FR')} à{' '}
+                          {new Date(order.createdAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                         </div>
                       </div>
-                    )}
-
-                    {order.items && order.items.length > 0 && (
-                      <div className="order-items">
-                        <div className="items-label">Médicaments :</div>
-                        <ul>
-                          {order.items.map((item, index) => (
-                            <li key={index}>{item}</li>
-                          ))}
-                        </ul>
+                      <div 
+                        className="order-status-badge status-animated" 
+                        style={{ backgroundColor: getStatusColor(order.status) + '20', color: getStatusColor(order.status) }}
+                      >
+                        {getStatusLabel(order.status)}
                       </div>
-                    )}
-
-                    {order.symptoms && (
-                      <div className="order-symptoms">
-                        <span className="symptoms-label">Symptômes :</span>
-                        <span>{order.symptoms}</span>
-                      </div>
-                    )}
-
-                    {/* Infos supplémentaires */}
-                    <div className="order-details">
-                      <div className="detail-item">
-                        <span className="detail-label">Total :</span>
-                        <span className="detail-value total-price">{order.total.toLocaleString()} FCFA</span>
-                      </div>
-                      {order.deliveryTime && (
-                        <div className="detail-item">
-                          <span className="detail-label">Livré en :</span>
-                          <span className="detail-value">{order.deliveryTime}</span>
-                        </div>
-                      )}
                     </div>
 
-                    {/* Bouton Commander à nouveau */}
+                    {/* Pharmacie */}
+                    <div className="order-pharmacy">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <path d="M19.5 9.5C19.5 15.5 12 21 12 21C12 21 4.5 15.5 4.5 9.5C4.5 5.35786 7.85786 2 12 2C16.1421 2 19.5 5.35786 19.5 9.5Z" stroke="#4caf50" strokeWidth="2"/>
+                        <circle cx="12" cy="9.5" r="2.5" fill="#4caf50"/>
+                      </svg>
+                      <span>{order.pharmacyName || 'Pharmacie'}</span>
+                    </div>
+
+                    {/* Bouton Suivre */}
                     <button 
-                      className="reorder-btn"
-                      onClick={() => handleReorder(order)}
+                      className="track-order-btn"
+                      onClick={() => navigate('/home', { state: { trackOrderId: order.id } })}
                     >
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <path d="M4 12C4 7.58172 7.58172 4 12 4C16.4183 4 20 7.58172 20 12C20 16.4183 16.4183 20 12 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                        <path d="M4 12L7 9M4 12L7 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z" fill="currentColor"/>
                       </svg>
-                      Commander à nouveau
+                      Suivre sur la carte
                     </button>
-                  </>
-                )}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+            </div>
+          )}
+
+          {/* Commandes terminées */}
+          {completedOrders.length > 0 && (
+            <div className="orders-section">
+              <h2 className="section-title">Historique ({completedOrders.length})</h2>
+              <div className="orders-list">
+                {completedOrders.map((order) => (
+                  <div key={order.id} className="order-card">
+                    {/* En-tête de la commande */}
+                    <div className="order-card-header">
+                      <div className="order-info">
+                        <div className="order-id-row">
+                          {getTypeIcon(order.orderType || 'liste')}
+                          <span className="order-id">{order.orderNumber || order.id}</span>
+                        </div>
+                        <div className="order-date">
+                          {new Date(order.createdAt).toLocaleDateString('fr-FR')} à{' '}
+                          {new Date(order.createdAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                      </div>
+                      <div 
+                        className="order-status-badge" 
+                        style={{ backgroundColor: getStatusColor(order.status) + '20', color: getStatusColor(order.status) }}
+                      >
+                        {getStatusLabel(order.status)}
+                      </div>
+                    </div>
+
+                    {/* Pharmacie */}
+                    <div className="order-pharmacy">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <path d="M19.5 9.5C19.5 15.5 12 21 12 21C12 21 4.5 15.5 4.5 9.5C4.5 5.35786 7.85786 2 12 2C16.1421 2 19.5 5.35786 19.5 9.5Z" stroke="#4caf50" strokeWidth="2"/>
+                        <circle cx="12" cy="9.5" r="2.5" fill="#4caf50"/>
+                      </svg>
+                      <span>{order.pharmacyName || 'Pharmacie'}</span>
+                    </div>
+
+                    {/* Contenu de la commande */}
+                    {order.status !== 'cancelled' && (
+                      <>
+                        {order.orderType === 'liste' && order.medicationList && (
+                          <div className="order-items">
+                            <div className="items-label">Médicaments :</div>
+                            <p className="medication-list-text">{order.medicationList}</p>
+                          </div>
+                        )}
+
+                        {order.orderType === 'symptomes' && order.symptoms && (
+                          <div className="order-symptoms">
+                            <span className="symptoms-label">Symptômes :</span>
+                            <span>{order.symptoms}</span>
+                          </div>
+                        )}
+
+                        {/* Infos supplémentaires */}
+                        <div className="order-details">
+                          <div className="detail-item">
+                            <span className="detail-label">Frais de livraison :</span>
+                            <span className="detail-value">{order.deliveryFee || 1000} FCFA</span>
+                          </div>
+                        </div>
+
+                        {/* Bouton Commander à nouveau */}
+                        <button 
+                          className="reorder-btn"
+                          onClick={() => handleReorder(order)}
+                        >
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                            <path d="M4 12C4 7.58172 7.58172 4 12 4C16.4183 4 20 7.58172 20 12C20 16.4183 16.4183 20 12 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                            <path d="M4 12L7 9M4 12L7 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                          Commander à nouveau
+                        </button>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* État vide */}
+          {orders.length === 0 && (
+            <div className="empty-state">
+              <div className="empty-icon">📦</div>
+              <h3>Aucune commande</h3>
+              <p>Vos commandes apparaîtront ici</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

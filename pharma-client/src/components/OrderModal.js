@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { createOrder } from '../services/api';
 import './OrderModal.css';
 
-function OrderModal({ isOpen, onClose }) {
+function OrderModal({ isOpen, onClose, selectedPharmacy, nearbyPharmacies, userPosition }) {
   const [selectedOption, setSelectedOption] = useState(null);
   const [medicationList, setMedicationList] = useState('');
   const [symptoms, setSymptoms] = useState('');
@@ -10,6 +10,7 @@ function OrderModal({ isOpen, onClose }) {
   const [forOther, setForOther] = useState(false);
   const [recipientName, setRecipientName] = useState('');
   const [recipientPhone, setRecipientPhone] = useState('');
+  const [chosenPharmacy, setChosenPharmacy] = useState(selectedPharmacy);
 
   if (!isOpen) return null;
 
@@ -20,8 +21,13 @@ function OrderModal({ isOpen, onClose }) {
       alert('Veuillez choisir une option');
       return;
     }
+
+    if (!chosenPharmacy) {
+      alert('Veuillez sélectionner une pharmacie');
+      return;
+    }
     
-    // Créer l'objet commande
+    // Créer l'objet commande avec la pharmacie réelle sélectionnée
     const orderData = {
       orderType: selectedOption,
       medicationList: selectedOption === 'liste' ? medicationList : '',
@@ -30,10 +36,12 @@ function OrderModal({ isOpen, onClose }) {
       forOther: forOther,
       recipientName: forOther ? recipientName : '',
       recipientPhone: forOther ? recipientPhone : '',
-      pharmacyId: '1', // TODO: Récupérer depuis la pharmacie sélectionnée
-      deliveryAddress: 'Cocody Angré, 7ème Tranche', // TODO: Récupérer depuis le profil utilisateur
-      deliveryLocation: { lat: 5.3650, lng: -4.0100 }, // TODO: GPS utilisateur
-      pharmacyLocation: { lat: 5.3680, lng: -4.0120 }
+      pharmacyId: chosenPharmacy.id || chosenPharmacy.place_id, // ID Google Places ou local
+      pharmacyName: chosenPharmacy.name,
+      pharmacyAddress: chosenPharmacy.address,
+      deliveryAddress: 'Position actuelle', // TODO: Géolocalisation précise
+      deliveryLocation: { lat: userPosition[0], lng: userPosition[1] },
+      pharmacyLocation: { lat: chosenPharmacy.position[0], lng: chosenPharmacy.position[1] }
     };
 
     try {
@@ -50,6 +58,7 @@ function OrderModal({ isOpen, onClose }) {
           <div class="success-icon-custom">✅</div>
           <h3>Commande envoyée !</h3>
           <p>Commande N° ${response.order.orderNumber}</p>
+          <p>Pharmacie: <strong>${chosenPharmacy.name}</strong></p>
           <p>Un livreur proche de votre position va être assigné automatiquement.</p>
           <div class="success-loader"></div>
         </div>
@@ -59,7 +68,7 @@ function OrderModal({ isOpen, onClose }) {
       setTimeout(() => {
         modal.remove();
         onClose();
-      }, 3000);
+      }, 4000);
       
       // Reset
       setSelectedOption(null);
@@ -114,6 +123,39 @@ function OrderModal({ isOpen, onClose }) {
             <p className="location-value">Géolocalisé automatiquement 📍</p>
           </div>
         </div>
+
+        {/* Pharmacie sélectionnée */}
+        {nearbyPharmacies && nearbyPharmacies.length > 0 && (
+          <div className="pharmacy-selector">
+            <label className="pharmacy-selector-label">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM17 13H13V17H11V13H7V11H11V7H13V11H17V13Z" fill="#2e7d32"/>
+              </svg>
+              Pharmacie pour le retrait
+            </label>
+            <select 
+              value={chosenPharmacy?.id || chosenPharmacy?.place_id || ''} 
+              onChange={(e) => {
+                const ph = nearbyPharmacies.find(p => (p.id || p.place_id) === e.target.value);
+                setChosenPharmacy(ph);
+              }}
+              className="pharmacy-select"
+            >
+              <option value="">-- Sélectionnez une pharmacie --</option>
+              {nearbyPharmacies.slice(0, 10).map((pharmacy) => (
+                <option key={pharmacy.id || pharmacy.place_id} value={pharmacy.id || pharmacy.place_id}>
+                  {pharmacy.name} - {pharmacy.address || 'Adresse non disponible'}
+                </option>
+              ))}
+            </select>
+            {chosenPharmacy && (
+              <p className="selected-pharmacy-info">
+                ✅ <strong>{chosenPharmacy.name}</strong>
+                {chosenPharmacy.isOpen ? ' 🟢 Ouverte' : ' 🔴 Fermée'}
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="modal-form">

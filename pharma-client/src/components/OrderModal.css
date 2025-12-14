@@ -111,6 +111,54 @@
   font-weight: 700;
 }
 
+/* Sélecteur de pharmacie */
+.pharmacy-selector {
+  margin: 0 24px 20px;
+  padding: 16px;
+  background: #f8faf9;
+  border: 2px solid #e8f5e9;
+  border-radius: 12px;
+}
+
+.pharmacy-selector-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: #1b5e20;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.pharmacy-select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid #2e7d32;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pharmacy-select:focus {
+  outline: none;
+  border-color: #1b5e20;
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+}
+
+.selected-pharmacy-info {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #2e7d32;
+  font-weight: 600;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 8px;
+}
+
 /* Form */
 .modal-form {
   padding: 24px;

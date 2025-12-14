@@ -64,17 +64,28 @@
   display: flex;
   flex-direction: column;
   color: white;
+  gap: 2px;
 }
 
 .order-number {
-  font-size: 16px;
-  font-weight: 700;
-  margin-bottom: 2px;
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0.9;
 }
 
 .client-name {
-  font-size: 14px;
-  opacity: 0.9;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.destination-address {
+  font-size: 12px;
+  font-weight: 400;
+  opacity: 0.85;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 95%;
 }
 
 /* HUD Prochain virage - Sous le header */

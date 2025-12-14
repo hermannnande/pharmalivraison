@@ -442,7 +442,10 @@ function ClientHomeUltra() {
       {/* Modal de commande */}
       <OrderModal 
         isOpen={isOrderModalOpen} 
-        onClose={() => setIsOrderModalOpen(false)} 
+        onClose={() => setIsOrderModalOpen(false)}
+        selectedPharmacy={selectedPharmacy}
+        nearbyPharmacies={nearbyPharmacies}
+        userPosition={userPosition}
       />
 
       {/* En-tête moderne */}

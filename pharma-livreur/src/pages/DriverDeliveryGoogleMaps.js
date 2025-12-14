@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { CONFIG } from '../config';
-import { startDelivery, arriveAtPharmacy, pickupDelivery, completeDelivery } from '../services/api';
+import { startDelivery, arriveAtPharmacy, pickupDelivery, completeDelivery, getOrderById } from '../services/api';
 import socketService from '../services/socket';
 import './DriverDeliveryGoogleMaps.css';
 
@@ -485,15 +485,61 @@ function DriverDeliveryGoogleMaps() {
     }
   };
 
-  // Charger les détails de la commande
+  // Charger les détails de la commande depuis l'API
   useEffect(() => {
-    // Simuler le chargement des détails
-    setOrderDetails({
-      clientName: 'Client',
-      clientAddress: 'Adresse de livraison'
-    });
-    setPharmacyPosition({ lat: 5.3500, lng: -4.0150 });
-    setClientPosition({ lat: 5.3650, lng: -4.0100 });
+    const loadOrderDetails = async () => {
+      try {
+        console.log('📦 Chargement commande:', orderId);
+        const response = await getOrderById(orderId);
+        console.log('✅ Commande chargée:', response);
+        
+        if (response.success && response.order) {
+          const order = response.order;
+          setOrderDetails({
+            ...order,
+            clientName: order.clientName || `${order.client?.firstName || ''} ${order.client?.lastName || ''}`.trim() || 'Client',
+            clientAddress: order.clientAddress || order.deliveryAddress || 'Adresse non spécifiée',
+            pharmacyName: order.pharmacyName || 'Pharmacie',
+            pharmacyAddress: order.pharmacyAddress || 'Adresse pharmacie non spécifiée'
+          });
+          
+          // Position pharmacie
+          if (order.pharmacyLocation) {
+            setPharmacyPosition({
+              lat: order.pharmacyLocation.lat,
+              lng: order.pharmacyLocation.lng
+            });
+          }
+          
+          // Position client
+          if (order.deliveryLocation || order.clientLocation) {
+            const clientLoc = order.deliveryLocation || order.clientLocation;
+            setClientPosition({
+              lat: clientLoc.lat,
+              lng: clientLoc.lng
+            });
+          }
+        } else {
+          console.warn('⚠️ Commande non trouvée ou réponse invalide');
+        }
+      } catch (error) {
+        console.error('❌ Erreur chargement commande:', error);
+        // Valeurs par défaut en cas d'erreur
+        setOrderDetails({
+          clientName: 'Client',
+          clientAddress: 'Adresse non disponible',
+          pharmacyName: 'Pharmacie',
+          pharmacyAddress: 'Adresse non disponible'
+        });
+        setPharmacyPosition({ lat: 5.3500, lng: -4.0150 });
+        setClientPosition({ lat: 5.3650, lng: -4.0100 });
+      }
+    };
+    
+    if (orderId) {
+      loadOrderDetails();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderId]);
 
   // Obtenir le texte du bouton selon le statut
@@ -546,7 +592,16 @@ function DriverDeliveryGoogleMaps() {
         </button>
         <div className="order-info">
           <span className="order-number">Commande #{orderId}</span>
-          <span className="client-name">{orderDetails?.clientName}</span>
+          <span className="client-name">
+            {deliveryStatus === 'accepted' || deliveryStatus === 'to-pharmacy' 
+              ? `📍 ${orderDetails?.pharmacyName || 'Pharmacie'}`
+              : `📍 ${orderDetails?.clientName || 'Client'}`}
+          </span>
+          <span className="destination-address">
+            {deliveryStatus === 'accepted' || deliveryStatus === 'to-pharmacy'
+              ? orderDetails?.pharmacyAddress
+              : orderDetails?.clientAddress}
+          </span>
         </div>
       </div>
 

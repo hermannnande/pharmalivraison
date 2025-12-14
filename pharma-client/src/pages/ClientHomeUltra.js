@@ -584,26 +584,46 @@ function ClientHomeUltra() {
                       <span className="badge-de-garde">🚑 DE GARDE</span>
                     )}
                   </div>
-                  <button 
-                    className="select-pharmacy-btn"
-                    onClick={() => {
-                      handlePharmacyClick(pharmacy);
-                      setIsOrderModalOpen(true);
-                    }}
-                    style={{
-                      marginTop: '10px',
-                      padding: '8px 16px',
-                      background: '#2e7d32',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '8px',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                      width: '100%'
-                    }}
-                  >
-                    ✅ Commander ici
-                  </button>
+                  
+                  {/* Bouton Commander uniquement si pharmacie OUVERTE */}
+                  {pharmacy.isOpen ? (
+                    <button 
+                      className="select-pharmacy-btn"
+                      onClick={() => {
+                        handlePharmacyClick(pharmacy);
+                        setIsOrderModalOpen(true);
+                      }}
+                      style={{
+                        marginTop: '10px',
+                        padding: '8px 16px',
+                        background: '#2e7d32',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        width: '100%'
+                      }}
+                    >
+                      ✅ Commander ici
+                    </button>
+                  ) : (
+                    <div 
+                      style={{
+                        marginTop: '10px',
+                        padding: '8px 16px',
+                        background: '#ffebee',
+                        color: '#c62828',
+                        border: '2px solid #c62828',
+                        borderRadius: '8px',
+                        fontWeight: '600',
+                        textAlign: 'center',
+                        fontSize: '13px'
+                      }}
+                    >
+                      ⚠️ Pharmacie fermée - Commande impossible
+                    </div>
+                  )}
                 </div>
               </Popup>
             </Marker>

@@ -22,6 +22,12 @@ function OrderModal({ isOpen, onClose, selectedPharmacy, nearbyPharmacies, userP
       alert('Veuillez choisir une option');
       return;
     }
+
+    // Bloquer si pharmacie fermée sélectionnée
+    if (chosenPharmacy && !chosenPharmacy.isOpen) {
+      alert('❌ Cette pharmacie est fermée.\n\nVeuillez :\n• Sélectionner une pharmacie ouverte sur la carte\n• Ou revenir en arrière pour laisser le système choisir automatiquement');
+      return;
+    }
     
     // Créer l'objet commande avec ou sans pharmacie sélectionnée
     const orderData = {
@@ -140,13 +146,13 @@ function OrderModal({ isOpen, onClose, selectedPharmacy, nearbyPharmacies, userP
 
         {/* Pharmacie sélectionnée (si cliquée sur la carte) */}
         {chosenPharmacy && (
-          <div className="selected-pharmacy-banner">
+          <div className={`selected-pharmacy-banner ${!chosenPharmacy.isOpen ? 'pharmacy-closed' : ''}`}>
             <div className="pharmacy-icon">🏥</div>
             <div className="pharmacy-details">
               <strong>{chosenPharmacy.name}</strong>
               <p>{chosenPharmacy.address}</p>
               <span className={chosenPharmacy.isOpen ? 'status-open' : 'status-closed'}>
-                {chosenPharmacy.isOpen ? '🟢 Ouverte' : '🔴 Fermée'}
+                {chosenPharmacy.isOpen ? '🟢 Ouverte' : '🔴 Fermée - Commande impossible'}
               </span>
             </div>
             <button 
@@ -159,6 +165,19 @@ function OrderModal({ isOpen, onClose, selectedPharmacy, nearbyPharmacies, userP
             >
               🔄
             </button>
+          </div>
+        )}
+
+        {/* Avertissement pharmacie fermée */}
+        {chosenPharmacy && !chosenPharmacy.isOpen && (
+          <div className="pharmacy-closed-warning">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z" fill="#c62828"/>
+            </svg>
+            <div>
+              <p className="warning-title">⚠️ Cette pharmacie est fermée</p>
+              <p className="warning-desc">Veuillez sélectionner une pharmacie ouverte ou laisser le système choisir automatiquement.</p>
+            </div>
           </div>
         )}
 

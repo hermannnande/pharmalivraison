@@ -10,7 +10,8 @@ function OrderModal({ isOpen, onClose, selectedPharmacy, nearbyPharmacies, userP
   const [forOther, setForOther] = useState(false);
   const [recipientName, setRecipientName] = useState('');
   const [recipientPhone, setRecipientPhone] = useState('');
-  const [chosenPharmacy, setChosenPharmacy] = useState(selectedPharmacy);
+  // Utiliser la pharmacie passée en prop (sélectionnée sur la carte)
+  const chosenPharmacy = selectedPharmacy;
 
   if (!isOpen) return null;
 
@@ -137,8 +138,45 @@ function OrderModal({ isOpen, onClose, selectedPharmacy, nearbyPharmacies, userP
           </div>
         </div>
 
+        {/* Pharmacie sélectionnée (si cliquée sur la carte) */}
+        {chosenPharmacy && (
+          <div className="selected-pharmacy-banner">
+            <div className="pharmacy-icon">🏥</div>
+            <div className="pharmacy-details">
+              <strong>{chosenPharmacy.name}</strong>
+              <p>{chosenPharmacy.address}</p>
+              <span className={chosenPharmacy.isOpen ? 'status-open' : 'status-closed'}>
+                {chosenPharmacy.isOpen ? '🟢 Ouverte' : '🔴 Fermée'}
+              </span>
+            </div>
+            <button 
+              className="change-pharmacy-btn"
+              onClick={() => {
+                onClose();
+                alert('Cliquez sur une autre pharmacie sur la carte pour changer');
+              }}
+              title="Changer de pharmacie"
+            >
+              🔄
+            </button>
+          </div>
+        )}
+
+        {/* Info si aucune pharmacie sélectionnée */}
+        {!chosenPharmacy && (
+          <div className="auto-selection-info">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 17L7 12H10V8H14V12H17L12 17Z" fill="#2e7d32"/>
+            </svg>
+            <div>
+              <p className="info-title">Sélection automatique</p>
+              <p className="info-desc">Une pharmacie ouverte proche sera sélectionnée pour vous</p>
+            </div>
+          </div>
+        )}
+
         {/* Pharmacie sélectionnée */}
-        {nearbyPharmacies && nearbyPharmacies.length > 0 && (
+        {nearbyPharmacies && nearbyPharmacies.length > 0 && false && (
           <div className="pharmacy-selector">
             <label className="pharmacy-selector-label">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">

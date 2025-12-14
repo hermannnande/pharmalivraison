@@ -78,6 +78,12 @@ function ClientHomeUltra() {
   const [showOnlyDeGarde, setShowOnlyDeGarde] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [notification, setNotification] = useState(null);
+
+  // Gérer la sélection de pharmacie sur la carte
+  const handlePharmacyClick = (pharmacy) => {
+    setSelectedPharmacy(pharmacy);
+    console.log('✅ Pharmacie sélectionnée:', pharmacy.name);
+  };
   // Activer automatiquement l'urgence de garde : week-end (samedi/dimanche) ou soir 18h-6h
   useEffect(() => {
     const now = new Date();
@@ -563,7 +569,7 @@ function ClientHomeUltra() {
               position={pharmacy.position}
               icon={createPharmacyIcon()}
               eventHandlers={{
-                click: () => setSelectedPharmacy(pharmacy)
+                click: () => handlePharmacyClick(pharmacy)
               }}
             >
               <Popup>
@@ -578,6 +584,26 @@ function ClientHomeUltra() {
                       <span className="badge-de-garde">🚑 DE GARDE</span>
                     )}
                   </div>
+                  <button 
+                    className="select-pharmacy-btn"
+                    onClick={() => {
+                      handlePharmacyClick(pharmacy);
+                      setIsOrderModalOpen(true);
+                    }}
+                    style={{
+                      marginTop: '10px',
+                      padding: '8px 16px',
+                      background: '#2e7d32',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      width: '100%'
+                    }}
+                  >
+                    ✅ Commander ici
+                  </button>
                 </div>
               </Popup>
             </Marker>

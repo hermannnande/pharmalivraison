@@ -175,39 +175,6 @@ function OrderModal({ isOpen, onClose, selectedPharmacy, nearbyPharmacies, userP
           </div>
         )}
 
-        {/* Pharmacie sélectionnée */}
-        {nearbyPharmacies && nearbyPharmacies.length > 0 && false && (
-          <div className="pharmacy-selector">
-            <label className="pharmacy-selector-label">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM17 13H13V17H11V13H7V11H11V7H13V11H17V13Z" fill="#2e7d32"/>
-              </svg>
-              Pharmacie pour le retrait
-            </label>
-            <select 
-              value={chosenPharmacy?.id || chosenPharmacy?.place_id || ''} 
-              onChange={(e) => {
-                const ph = nearbyPharmacies.find(p => (p.id || p.place_id) === e.target.value);
-                setChosenPharmacy(ph);
-              }}
-              className="pharmacy-select"
-            >
-              <option value="">-- Sélection automatique (recommandé) --</option>
-              {nearbyPharmacies.slice(0, 10).map((pharmacy) => (
-                <option key={pharmacy.id || pharmacy.place_id} value={pharmacy.id || pharmacy.place_id}>
-                  {pharmacy.name} - {pharmacy.address || 'Adresse non disponible'}
-                </option>
-              ))}
-            </select>
-            {chosenPharmacy && (
-              <p className="selected-pharmacy-info">
-                ✅ <strong>{chosenPharmacy.name}</strong>
-                {chosenPharmacy.isOpen ? ' 🟢 Ouverte' : ' 🔴 Fermée'}
-              </p>
-            )}
-          </div>
-        )}
-
         {/* Form */}
         <form onSubmit={handleSubmit} className="modal-form">
           <div className="form-step">

@@ -338,9 +338,9 @@ function ClientHomeUltra() {
     };
   }, []);
 
-  // Filtrer les pharmacies selon le mode
+  // Filtrer les pharmacies selon le mode (affiche même fermées pour voir toutes les positions)
   const displayedPharmacies = showOnlyDeGarde 
-    ? nearbyPharmacies.filter(p => p.isDeGarde && p.isOpen)
+    ? nearbyPharmacies.filter(p => p.isDeGarde)
     : nearbyPharmacies;
 
   const handleUrgenceDeGarde = () => {

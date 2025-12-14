@@ -6,12 +6,12 @@ const axios = require('axios');
 
 const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
 const ABIDJAN_CENTER = { lat: 5.3600, lng: -4.0083 };
-const SEARCH_RADIUS = 50000; // 50km autour d'Abidjan
+const DEFAULT_SEARCH_RADIUS = 10000; // 10 km par défaut autour d'Abidjan
 
 /**
  * Rechercher les pharmacies autour d'Abidjan via Google Places API
  */
-async function getNearbyPharmacies(latitude = ABIDJAN_CENTER.lat, longitude = ABIDJAN_CENTER.lng, radius = SEARCH_RADIUS) {
+async function getNearbyPharmacies(latitude = ABIDJAN_CENTER.lat, longitude = ABIDJAN_CENTER.lng, radius = DEFAULT_SEARCH_RADIUS) {
   try {
     if (!GOOGLE_MAPS_API_KEY) {
       throw new Error('GOOGLE_MAPS_API_KEY non configurée');

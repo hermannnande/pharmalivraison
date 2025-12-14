@@ -386,7 +386,7 @@ app.post('/api/auth/register', (req, res) => {
 // Liste des pharmacies (données réelles Google Places)
 app.get('/api/pharmacies', async (req, res) => {
   try {
-    const { search, isOpen, is24h, isOnGuard, lat, lng, useRealData } = req.query;
+    const { search, isOpen, is24h, isOnGuard, lat, lng, radius, useRealData } = req.query;
     
     // Si useRealData=true, utiliser Google Places API
     if (useRealData === 'true') {
@@ -394,7 +394,8 @@ app.get('/api/pharmacies', async (req, res) => {
       const longitude = lng ? parseFloat(lng) : -4.0083;
       
       console.log(`🔍 Recherche pharmacies réelles (lat: ${latitude}, lng: ${longitude})`);
-      const result = await placesService.getNearbyPharmacies(latitude, longitude);
+      const searchRadius = radius ? parseInt(radius, 10) : undefined; // en mètres
+      const result = await placesService.getNearbyPharmacies(latitude, longitude, searchRadius);
       
       if (!result.success) {
         // Fallback sur données locales en cas d'erreur

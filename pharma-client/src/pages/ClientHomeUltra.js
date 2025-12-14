@@ -157,7 +157,8 @@ function ClientHomeUltra() {
           params: {
             useRealData: 'true',
             lat,
-            lng
+            lng,
+            radius: 10000 // 10 km
           },
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`

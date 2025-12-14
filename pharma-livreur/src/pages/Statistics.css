@@ -1,44 +1,44 @@
-﻿.statistics-page{min-height:100vh;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);padding-bottom:20px}
+﻿.statistics-page{min-height:100vh;background:#f5f7fa;padding-bottom:20px}
 
-.stats-header{background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(255,255,255,0.1)}
+.stats-header{background:white;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid #e9ecef;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
 
-.stats-header h1{font-size:20px;font-weight:700;color:white;margin:0;flex:1;text-align:center}
+.stats-header h1{font-size:20px;font-weight:700;color:#1e293b;margin:0;flex:1;text-align:center}
 
-.back-btn{background:rgba(255,255,255,0.2);border:none;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;transition:all 0.3s ease}
+.back-btn{background:#f1f5f9;border:none;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#475569;transition:all 0.3s ease}
 
-.back-btn:hover{background:rgba(255,255,255,0.3);transform:scale(1.05)}
+.back-btn:hover{background:#e2e8f0;transform:scale(1.05)}
 
 /* Filtres de période */
 .period-filters{display:flex;gap:8px;padding:20px 20px 0;overflow-x:auto;margin-bottom:16px}
 
-.period-btn{background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);color:white;padding:10px 20px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.3s ease;white-space:nowrap}
+.period-btn{background:white;border:1px solid #e2e8f0;color:#64748b;padding:10px 20px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.3s ease;white-space:nowrap}
 
-.period-btn:hover{background:rgba(255,255,255,0.3)}
+.period-btn:hover{background:#f8fafc;border-color:#cbd5e1}
 
-.period-btn.active{background:white;color:#667eea;border-color:white}
+.period-btn.active{background:#3b82f6;color:white;border-color:#3b82f6}
 
 /* Section Gains de la période */
 .period-earnings-section{padding:0 20px;margin-bottom:24px}
 
-.period-earnings-section h2{color:white;font-size:18px;font-weight:700;margin:0 0 16px}
+.period-earnings-section h2{color:#1e293b;font-size:18px;font-weight:700;margin:0 0 16px}
 
 .period-earnings-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 
-.period-card{background:rgba(255,255,255,0.15);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2);border-radius:16px;padding:16px 12px;text-align:center;transition:all 0.3s ease}
+.period-card{background:white;border:1px solid #e2e8f0;border-radius:16px;padding:16px 12px;text-align:center;transition:all 0.3s ease;box-shadow:0 2px 4px rgba(0,0,0,0.05)}
 
-.period-card:hover{background:rgba(255,255,255,0.2);transform:translateY(-4px)}
+.period-card:hover{border-color:#3b82f6;box-shadow:0 4px 12px rgba(59,130,246,0.15);transform:translateY(-4px)}
 
 .period-icon{font-size:32px;margin-bottom:8px}
 
-.period-value{font-size:20px;font-weight:700;color:white;margin-bottom:4px}
+.period-value{font-size:20px;font-weight:700;color:#1e293b;margin-bottom:4px}
 
-.period-label{font-size:11px;color:rgba(255,255,255,0.8);font-weight:600}
+.period-label{font-size:11px;color:#64748b;font-weight:600}
 
 .main-stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:0 20px;margin-bottom:20px}
 
-.stat-card{background:white;border-radius:16px;padding:24px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,0.06);transition:all 0.3s ease;border:1px solid #e9ecef}
+.stat-card{background:white;border-radius:16px;padding:24px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06);transition:all 0.3s ease;border:1px solid #e9ecef}
 
-.stat-card:hover{box-shadow:0 4px 10px rgba(0,0,0,0.1);transform:translateY(-2px)}
+.stat-card:hover{box-shadow:0 4px 12px rgba(59,130,246,0.15);transform:translateY(-2px);border-color:#3b82f6}
 
 .stat-icon{font-size:40px;margin-bottom:12px}
 

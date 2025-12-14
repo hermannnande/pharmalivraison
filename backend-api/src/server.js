@@ -641,7 +641,7 @@ app.post('/api/orders', async (req, res) => {
         const result = await placesService.searchPharmacies(
           clientLoc.lat, 
           clientLoc.lng, 
-          5000, // 5km de rayon
+          10000, // 10km de rayon (même périmètre que l'affichage client)
           'pharmacy'
         );
         

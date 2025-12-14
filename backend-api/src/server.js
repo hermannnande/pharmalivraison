@@ -989,9 +989,13 @@ app.put('/api/deliveries/:id/location', (req, res) => {
   res.json({ success: true, delivery });
 });
 
-// Terminer une livraison
+// Terminer une livraison (accepte deliveryId, orderId ou orderNumber)
 app.post('/api/deliveries/:id/complete', (req, res) => {
-  const delivery = deliveries.find(d => d.id === req.params.id);
+  const delivery = deliveries.find(d => 
+    d.id === req.params.id ||
+    d.orderId === req.params.id ||
+    d.orderNumber === req.params.id
+  );
   
   if (!delivery) {
     return res.status(404).json({

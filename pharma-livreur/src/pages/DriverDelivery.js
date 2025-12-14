@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, Polyline, Circle } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Polyline, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import socketService from '../services/socket';
-import { getOrderById, pickupDelivery, completeDelivery } from '../services/api';
+import { getOrderById, startDelivery, arriveAtPharmacy, pickupDelivery, completeDelivery } from '../services/api';
+import { calculateCurrentRoute, calculateFullDeliveryRoute, shouldRecalculateRoute } from '../services/routingGoogleMaps';
 import 'leaflet/dist/leaflet.css';
 import './DriverDelivery.css';
 
@@ -29,6 +30,22 @@ const clientIcon = L.divIcon({
   iconAnchor: [20, 40]
 });
 
+// Composant pour centrer automatiquement la carte sur le livreur
+function MapCenterController({ center, zoom = 16 }) {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (center) {
+      map.setView(center, zoom, {
+        animate: true,
+        duration: 1.5 // Animation fluide
+      });
+    }
+  }, [center, zoom, map]);
+  
+  return null;
+}
+
 function DriverDelivery() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -51,6 +68,12 @@ function DriverDelivery() {
     estimatedPrice: '12,500 FCFA',
     deliveryFee: '1,000 FCFA'
   });
+  
+  // États pour l'itinéraire Google Maps
+  const [routeData, setRouteData] = useState(null); // Données de l'itinéraire actuel
+  const [routeLoading, setRouteLoading] = useState(false);
+  const [routeError, setRouteError] = useState(null);
+  const [lastRouteUpdate, setLastRouteUpdate] = useState(Date.now()); // Pour éviter trop de recalculs
 
   // Charger les détails de la commande et connecter Socket.IO
   useEffect(() => {
@@ -117,6 +140,82 @@ function DriverDelivery() {
       socketService.stopLocationTracking();
     };
   }, [orderId, deliveryStatus]);
+  
+  // Calculer l'itinéraire avec Google Maps (seulement au changement de statut)
+  useEffect(() => {
+    const fetchRoute = async () => {
+      if (deliveryStatus === 'delivered') return;
+      
+      // Éviter de recalculer si moins de 30 secondes se sont écoulées
+      const timeSinceLastUpdate = Date.now() - lastRouteUpdate;
+      if (timeSinceLastUpdate < 30000 && routeData) {
+        console.log('⏳ Itinéraire récent, pas de recalcul');
+        return;
+      }
+      
+      setRouteLoading(true);
+      setRouteError(null);
+      
+      try {
+        console.log('🗺️ Calcul itinéraire Google Maps...', { status: deliveryStatus });
+        
+        const route = await calculateCurrentRoute(
+          driverPosition,
+          pharmacyPosition,
+          clientPosition,
+          deliveryStatus
+        );
+        
+        if (route) {
+          setRouteData(route);
+          setRoutePoints(route.route); // [[lat, lng], ...]
+          setLastRouteUpdate(Date.now());
+          console.log('✅ Itinéraire calculé:', {
+            distance: route.distance,
+            duration: route.durationInTraffic || route.duration,
+            points: route.route.length
+          });
+        }
+      } catch (error) {
+        console.error('❌ Erreur calcul itinéraire:', error);
+        setRouteError('Impossible de calculer l\'itinéraire');
+      } finally {
+        setRouteLoading(false);
+      }
+    };
+    
+    fetchRoute();
+    // IMPORTANT: Ne recalculer QUE quand le statut change, PAS à chaque changement de position
+  }, [deliveryStatus]);
+  
+  // Recalculer l'itinéraire si le livreur s'éloigne trop de la route
+  useEffect(() => {
+    if (!routePoints || routePoints.length === 0 || deliveryStatus === 'delivered') return;
+    
+    const interval = setInterval(() => {
+      if (shouldRecalculateRoute(driverPosition, routePoints, 0.2)) { // 200m de tolérance
+        console.log('🔄 Livreur s\'est éloigné de la route (>200m), recalcul...');
+        
+        // Recalculer l'itinéraire
+        calculateCurrentRoute(
+          driverPosition,
+          pharmacyPosition,
+          clientPosition,
+          deliveryStatus
+        ).then(route => {
+          if (route) {
+            setRouteData(route);
+            setRoutePoints(route.route);
+            console.log('✅ Itinéraire recalculé avec succès');
+          }
+        }).catch(error => {
+          console.error('❌ Erreur recalcul itinéraire:', error);
+        });
+      }
+    }, 60000); // Vérifier toutes les 60 secondes (au lieu de 30)
+    
+    return () => clearInterval(interval);
+  }, [driverPosition, routePoints, deliveryStatus, pharmacyPosition, clientPosition]);
 
   // Calculer la distance
   const calculateDistance = () => {
@@ -190,46 +289,55 @@ function DriverDelivery() {
 
     const nextStatus = statusFlow[deliveryStatus];
     
-    // Réduire le panel quand on part vers la pharmacie ou le client
-    if (nextStatus === 'to-pharmacy' || nextStatus === 'to-client') {
-      setPanelCollapsed(true);
-    }
+    if (!nextStatus) return;
     
-    // Agrandir le panel quand on arrive
-    if (nextStatus === 'at-pharmacy') {
-      setPanelCollapsed(false);
-    }
-    
+    // Gestion spéciale pour la livraison terminée
     if (nextStatus === 'delivered') {
       if (window.confirm('Confirmer la livraison ?')) {
-        // Mettre à jour via l'API
         try {
           await completeDelivery(orderId);
-          socketService.updateDeliveryStatus(orderId, 'delivered');
           socketService.stopLocationTracking();
+          setDeliveryStatus(nextStatus);
+          
+          console.log('✅ Livraison terminée avec succès !');
+          
+          setTimeout(() => {
+            navigate('/livreur-dashboard');
+          }, 2000);
         } catch (error) {
-          console.error('Erreur lors de la livraison:', error);
+          console.error('❌ Erreur lors de la livraison:', error);
+          alert('Erreur lors de la confirmation de la livraison');
         }
-        
-        setDeliveryStatus(nextStatus);
-        setTimeout(() => {
-          navigate('/livreur-dashboard');
-        }, 2000);
       }
-    } else {
+      return;
+    }
+    
+    // Pour les autres changements de statut
+    try {
+      if (nextStatus === 'to-pharmacy') {
+        // Démarrer la livraison
+        await startDelivery(orderId);
+        console.log('🏍️ Départ vers la pharmacie !');
+        setPanelCollapsed(true);
+        
+      } else if (nextStatus === 'at-pharmacy') {
+        // Arrivé à la pharmacie
+        await arriveAtPharmacy(orderId);
+        console.log('⚕️ Arrivé à la pharmacie !');
+        setPanelCollapsed(false);
+        
+      } else if (nextStatus === 'to-client') {
+        // Médicaments récupérés, départ vers le client
+        await pickupDelivery(orderId);
+        console.log('🚚 Médicaments récupérés, en route vers le client !');
+        setPanelCollapsed(true);
+      }
+      
       setDeliveryStatus(nextStatus);
       
-      // Mettre à jour le statut via Socket.IO et l'API
-      try {
-        if (nextStatus === 'at-pharmacy') {
-          socketService.updateDeliveryStatus(orderId, 'at_pharmacy');
-        } else if (nextStatus === 'to-client') {
-          await pickupDelivery(orderId);
-          socketService.updateDeliveryStatus(orderId, 'picked_up');
-        }
-      } catch (error) {
-        console.error('Erreur lors de la mise à jour:', error);
-      }
+    } catch (error) {
+      console.error('❌ Erreur lors de la mise à jour du statut:', error);
+      alert(error.message || 'Erreur lors de la mise à jour du statut');
     }
   };
 
@@ -308,7 +416,7 @@ function DriverDelivery() {
       <div className="delivery-map">
         <MapContainer
           center={driverPosition}
-          zoom={14}
+          zoom={16}
           style={{ height: '100%', width: '100%' }}
           zoomControl={false}
         >
@@ -316,6 +424,9 @@ function DriverDelivery() {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; OpenStreetMap contributors'
           />
+          
+          {/* Composant pour centrer automatiquement sur le livreur */}
+          <MapCenterController center={driverPosition} zoom={16} />
 
           {/* Driver Position */}
           <Marker position={driverPosition} icon={driverIcon} />
@@ -331,44 +442,35 @@ function DriverDelivery() {
           {/* Client */}
           <Marker position={clientPosition} icon={clientIcon} />
 
-          {/* Route */}
-          {routePoints.length > 0 && (
+          {/* Route Google Maps tracée */}
+          {routePoints && routePoints.length > 0 ? (
             <>
-              {/* Ombre de la route */}
+              {console.log('🗺️ Affichage de la route:', routePoints.length, 'points')}
+              {/* Ombre de la route pour meilleure visibilité */}
               <Polyline
                 positions={routePoints}
                 pathOptions={{ 
                   color: '#000000', 
                   weight: 8, 
                   opacity: 0.2,
-                  dashArray: '0'
                 }}
               />
-              {/* Route principale */}
+              {/* Route principale colorée */}
               <Polyline
                 positions={routePoints}
                 pathOptions={{ 
-                  color: statusInfo.color, 
-                  weight: 5, 
-                  dashArray: '10, 10',
+                  color: '#667eea', // Violet/bleu
+                  weight: 6, 
+                  opacity: 0.9,
                   lineCap: 'round',
                   lineJoin: 'round'
                 }}
               />
-              {/* Ligne animée sur la route */}
-              <Polyline
-                positions={routePoints}
-                pathOptions={{ 
-                  color: 'white', 
-                  weight: 2, 
-                  dashArray: '10, 20',
-                  dashOffset: '0',
-                  lineCap: 'round'
-                }}
-                className="animated-route"
-              />
             </>
+          ) : (
+            console.log('❌ Aucune route à afficher (routePoints vide)')
           )}
+
         </MapContainer>
       </div>
 
@@ -445,6 +547,43 @@ function DriverDelivery() {
             </div>
           </div>
         </div>
+        
+        {/* Informations itinéraire Google Maps */}
+        {routeData && (
+          <div className="route-info">
+            <h4>📍 Itinéraire</h4>
+            {routeLoading && <p className="loading-text">Calcul en cours...</p>}
+            {routeError && <p className="error-text">{routeError}</p>}
+            {!routeLoading && !routeError && (
+              <>
+                <div className="route-detail">
+                  <span>Distance</span>
+                  <strong>{routeData.distance}</strong>
+                </div>
+                <div className="route-detail">
+                  <span>Temps estimé</span>
+                  <strong>{routeData.duration}</strong>
+                </div>
+                {routeData.durationInTraffic && (
+                  <div className="route-detail traffic">
+                    <span>⚠️ Avec trafic</span>
+                    <strong className="traffic-time">{routeData.durationInTraffic}</strong>
+                  </div>
+                )}
+                <div className="route-steps">
+                  <summary>Instructions</summary>
+                  {routeData.instructions && routeData.instructions.slice(0, 3).map((step, index) => (
+                    <div key={index} className="step-item">
+                      <span className="step-number">{index + 1}</span>
+                      <span className="step-instruction">{step.instruction}</span>
+                      <span className="step-distance">{step.distance}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
 
         {/* Action Button */}
         {statusInfo.action && deliveryStatus !== 'delivered' && (

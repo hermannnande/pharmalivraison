@@ -398,3 +398,6 @@ Votre MVP est prêt. Il ne vous reste plus qu'à :
 
 *Document généré automatiquement lors du déploiement - 13/12/2025*
 
+
+
+

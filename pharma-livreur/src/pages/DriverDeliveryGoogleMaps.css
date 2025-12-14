@@ -1,0 +1,390 @@
+/* =====================================================
+   NAVIGATION 3D GOOGLE MAPS - STYLE UBER/YANDEX
+   ===================================================== */
+
+.driver-delivery-3d {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #f2f5f9; /* évite l'écran noir en fond si les tuiles chargent lentement */
+}
+
+/* Carte Google Maps en plein écran */
+.google-map-3d {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  background: #f2f5f9; /* fallback visuel */
+}
+
+/* HUD Header - En haut */
+.hud-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: linear-gradient(180deg, rgba(37, 99, 235, 0.95) 0%, rgba(37, 99, 235, 0.85) 100%);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  transition: background 0.3s ease;
+}
+
+.back-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-right: 15px;
+  transition: all 0.2s ease;
+}
+
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.order-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  color: white;
+}
+
+.order-number {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.client-name {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* HUD Prochain virage - Sous le header */
+.next-turn-hud {
+  position: fixed;
+  top: 90px;
+  left: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(15px);
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  z-index: 999;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  animation: slideInDown 0.3s ease;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.turn-icon {
+  font-size: 36px;
+  flex-shrink: 0;
+}
+
+.turn-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.turn-instruction {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 5px;
+  line-height: 1.3;
+}
+
+.turn-distance {
+  font-size: 16px;
+  color: #10B981;
+  font-weight: 600;
+}
+
+/* Badge "Vous arrivez" */
+.arrival-badge {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: white;
+  padding: 20px 40px;
+  border-radius: 50px;
+  font-size: 20px;
+  font-weight: 700;
+  box-shadow: 0 10px 40px rgba(16, 185, 129, 0.5);
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: bounceIn 0.5s ease;
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.3);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.pulse-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: white;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.5;
+  }
+}
+
+/* Bottom HUD */
+.bottom-hud {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.85) 100%);
+  backdrop-filter: blur(15px);
+  padding: 20px;
+  z-index: 1000;
+  box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.3);
+  pointer-events: auto;
+}
+
+.hud-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  color: white;
+}
+
+/* Affichage de la vitesse */
+.speed-display {
+  background: rgba(37, 99, 235, 0.2);
+  border: 2px solid rgba(37, 99, 235, 0.5);
+  border-radius: 15px;
+  padding: 12px 20px;
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.speed-value {
+  font-size: 32px;
+  font-weight: 900;
+  color: #3B82F6;
+  line-height: 1;
+}
+
+.speed-unit {
+  font-size: 14px;
+  font-weight: 600;
+  color: #93C5FD;
+}
+
+/* Info itinéraire HUD */
+.route-info-hud {
+  background: rgba(16, 185, 129, 0.2);
+  border: 2px solid rgba(16, 185, 129, 0.5);
+  border-radius: 15px;
+  padding: 12px 20px;
+  text-align: right;
+}
+
+.eta {
+  font-size: 24px;
+  font-weight: 900;
+  color: #10B981;
+  line-height: 1;
+  margin-bottom: 3px;
+}
+
+.distance {
+  font-size: 14px;
+  font-weight: 600;
+  color: #6EE7B7;
+}
+
+/* Bouton d'action principal */
+.action-btn-3d {
+  width: 100%;
+  padding: 18px;
+  border: none;
+  border-radius: 20px;
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1001;
+}
+
+.action-btn-3d:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.4);
+}
+
+.action-btn-3d:active {
+  transform: translateY(0);
+}
+
+/* Bouton recentrer */
+.recenter-button {
+  position: fixed;
+  bottom: 200px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(37, 99, 235, 0.95);
+  border: 3px solid white;
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 999;
+  transition: all 0.3s ease;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.recenter-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 30px rgba(37, 99, 235, 0.7);
+}
+
+.recenter-icon {
+  font-size: 24px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hud-header {
+    height: 60px;
+    padding: 0 15px;
+  }
+
+  .next-turn-hud {
+    top: 75px;
+    left: 15px;
+    right: 15px;
+    padding: 15px;
+  }
+
+  .turn-icon {
+    font-size: 28px;
+  }
+
+  .turn-instruction {
+    font-size: 16px;
+  }
+
+  .turn-distance {
+    font-size: 14px;
+  }
+
+  .arrival-badge {
+    font-size: 16px;
+    padding: 15px 30px;
+  }
+
+  .bottom-hud {
+    padding: 15px;
+  }
+
+  .speed-value {
+    font-size: 28px;
+  }
+
+  .eta {
+    font-size: 20px;
+  }
+
+  .action-btn-3d {
+    font-size: 16px;
+    padding: 16px;
+  }
+
+  .recenter-button {
+    bottom: 180px;
+    right: 15px;
+    width: 50px;
+    height: 50px;
+  }
+}
+
+/* Animation du marqueur driver */
+@keyframes markerPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+

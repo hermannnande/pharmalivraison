@@ -140,6 +140,29 @@ export const acceptDelivery = async (orderId) => {
   }
 };
 
+// ==================== GESTION DES STATUTS DE LIVRAISON ====================
+
+// 1. Démarrer la livraison (partir vers pharmacie)
+export const startDelivery = async (deliveryId) => {
+  try {
+    const response = await api.put(`/deliveries/${deliveryId}/start`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Erreur lors du démarrage de la livraison' };
+  }
+};
+
+// 2. Arrivé à la pharmacie
+export const arriveAtPharmacy = async (deliveryId) => {
+  try {
+    const response = await api.put(`/deliveries/${deliveryId}/arrive-pharmacy`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Erreur lors de la mise à jour du statut' };
+  }
+};
+
+// 3. Récupérer les médicaments (partir vers client)
 export const pickupDelivery = async (orderId) => {
   try {
     const response = await api.put(`/deliveries/${orderId}/pickup`);
@@ -149,21 +172,22 @@ export const pickupDelivery = async (orderId) => {
   }
 };
 
+// 4. Terminer la livraison
+export const completeDelivery = async (deliveryId) => {
+  try {
+    const response = await api.put(`/deliveries/${deliveryId}/complete`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Erreur lors de la finalisation de la livraison' };
+  }
+};
+
 export const updateDeliveryLocation = async (deliveryId, location) => {
   try {
     const response = await api.put(`/deliveries/${deliveryId}/location`, location);
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: 'Erreur lors de la mise à jour de la position' };
-  }
-};
-
-export const completeDelivery = async (deliveryId) => {
-  try {
-    const response = await api.post(`/deliveries/${deliveryId}/complete`);
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || { message: 'Erreur lors de la finalisation de la livraison' };
   }
 };
 

@@ -155,21 +155,55 @@ class SocketService {
       return;
     }
 
+    // Variables pour la simulation (si GPS ne fonctionne pas sur PC)
+    let simulatedLat = 5.3600;
+    let simulatedLng = -4.0083;
+    let simulationActive = false;
+
     // Fonction pour obtenir et envoyer la position
     const sendLocation = () => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude, speed, heading } = position.coords;
           this.updateLocation(orderId, latitude, longitude, speed || 0, heading || 0);
-          console.log('📍 Position envoyée:', { latitude, longitude });
+          console.log('📍 Position réelle envoyée:', { latitude, longitude });
+          simulationActive = false; // GPS fonctionne
         },
         (error) => {
-          console.error('❌ Erreur de géolocalisation:', error.message);
+          console.warn('⚠️ GPS indisponible:', error.message, '- Mode simulation PC');
+          
+          // SIMULATION pour tests sur PC
+          if (!simulationActive) {
+            console.log('🎮 MODE SIMULATION GPS activé (pour tests sur ordinateur)');
+            simulationActive = true;
+          }
+          
+          // Simuler un déplacement réaliste (0.0001° ≈ 11 mètres)
+          simulatedLat += 0.0001 * (Math.random() * 0.5 + 0.5); // Avancer
+          simulatedLng += 0.00005 * (Math.random() - 0.5); // Léger zigzag
+          
+          const simulatedSpeed = 25 + Math.random() * 25; // 25-50 km/h
+          const simulatedHeading = 45 + Math.random() * 10; // Direction ~nord-est
+          
+          this.updateLocation(
+            orderId, 
+            simulatedLat, 
+            simulatedLng, 
+            simulatedSpeed, 
+            simulatedHeading
+          );
+          
+          console.log('🎮 Position simulée:', { 
+            lat: simulatedLat.toFixed(6), 
+            lng: simulatedLng.toFixed(6),
+            speed: simulatedSpeed.toFixed(1) + ' km/h',
+            heading: simulatedHeading.toFixed(0) + '°'
+          });
         },
         {
           enableHighAccuracy: true,
-          timeout: 5000,
-          maximumAge: 0,
+          timeout: 15000, // 15 secondes
+          maximumAge: 10000, // Accepter position de 10s
         }
       );
     };
@@ -179,6 +213,8 @@ class SocketService {
 
     // Puis envoyer à intervalle régulier
     this.locationInterval = setInterval(sendLocation, intervalMs);
+    
+    console.log('🚀 Tracking GPS démarré (avec simulation pour tests PC)');
   }
 
   // Arrêter le suivi de position automatique

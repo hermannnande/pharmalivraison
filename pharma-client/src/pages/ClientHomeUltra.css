@@ -308,22 +308,29 @@
 
 /* Panel moderne en bas */
 .bottom-panel-modern {
-  position: absolute;
-  bottom: 0; /* Plus besoin d'espace pour le menu du bas */
+  position: fixed;
+  bottom: 0;
   left: 0;
   right: 0;
   background: white;
   border-radius: 20px 20px 0 0;
-  padding: 6px 18px 20px;
+  padding: 6px 18px 16px;
   z-index: 500;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  max-height: 85vh;
-  overflow: hidden;
+  transition: all 0.3s ease;
+  max-height: 45vh; /* Hauteur par défaut plus haute */
+  overflow-y: auto;
 }
 
 .bottom-panel-modern.expanded {
-  padding-bottom: 100px;
+  max-height: 75vh;
+  padding-bottom: 90px;
+}
+
+.bottom-panel-modern.collapsed {
+  max-height: 320px; /* Plus haut pour voir boutons + infos livreur + commandes */
+  padding-bottom: 12px;
+  overflow-y: auto;
 }
 
 /* Indicateur de drag */
@@ -918,6 +925,123 @@
     bottom: 0;
     max-height: 70vh;
   }
+}
+
+/* Tracking commande client */
+.tracking-card {
+  margin-top: 16px;
+  background: #0f172a;
+  color: white;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+}
+
+.tracking-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tracking-title {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.tracking-subtitle {
+  font-size: 13px;
+  color: #cbd5e1;
+  margin-top: 4px;
+}
+
+.tracking-metrics {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: #a5f3fc;
+  white-space: nowrap;
+}
+
+.tracking-metrics .dot {
+  color: #475569;
+}
+
+.tracking-driver {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tracking-driver .avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: white;
+  font-size: 16px;
+}
+
+.driver-info .driver-name {
+  font-weight: 700;
+}
+
+.driver-info .driver-meta {
+  font-size: 13px;
+  color: #cbd5e1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tracking-list {
+  margin-top: 16px;
+}
+
+.tracking-list h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  color: #0f172a;
+}
+
+.tracking-item {
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.tracking-item.selected {
+  border-color: #2563eb;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.12);
+}
+
+.tracking-item-title {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.tracking-item-sub {
+  color: #475569;
+  font-size: 13px;
+}
+
+.tracking-item-meta {
+  margin-top: 4px;
+  color: #475569;
+  font-size: 12px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
 }
 
 

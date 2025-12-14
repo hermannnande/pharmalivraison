@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  # Base de données MongoDB
+  mongodb:
+    image: mongo:7.0
+    container_name: pharma-mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: pharmalivraison
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - pharma-network
+
+  # Backend API
+  backend:
+    build: ./backend
+    container_name: pharma-backend
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+      - MONGODB_URI=mongodb://mongodb:27017/pharmalivraison
+      - JWT_SECRET=pharma_secret_key_2024_super_securise
+      - DEFAULT_DELIVERY_FEE=1000
+    depends_on:
+      - mongodb
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - pharma-network
+    command: sh -c "sleep 10 && npm run dev"
+
+networks:
+  pharma-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+
+
+
+
+
+
+
+

@@ -1,0 +1,27 @@
+{
+  "name": "pharmalivraison-abidjan",
+  "version": "1.0.0",
+  "description": "Application de livraison de médicaments pour Abidjan",
+  "main": "index.js",
+  "scripts": {
+    "install-all": "npm install && cd backend && npm install && cd ../mobile && npm install",
+    "backend": "cd backend && npm run dev",
+    "mobile": "cd mobile && npm start"
+  },
+  "keywords": [
+    "pharma",
+    "livraison",
+    "abidjan",
+    "medicaments"
+  ],
+  "author": "",
+  "license": "MIT"
+}
+
+
+
+
+
+
+
+

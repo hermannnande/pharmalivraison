@@ -162,6 +162,22 @@ export const getOrderById = async (orderId) => {
   }
 };
 
+export const getDirections = async (origin, destination) => {
+  try {
+    const response = await api.get('/google-maps/directions', {
+      params: {
+        origin,
+        destination,
+        mode: 'driving',
+        departure_time: 'now'
+      }
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Erreur lors du calcul d\'itinéraire' };
+  }
+};
+
 export const updateOrderStatus = async (orderId, status) => {
   try {
     const response = await api.put(`/orders/${orderId}/status`, { status });

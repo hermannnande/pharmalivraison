@@ -131,7 +131,7 @@ const LivreurDashboard = () => {
       setShowOrderDetails(null);
       
       // Naviguer vers la page de livraison
-      navigate('/driver-delivery', { state: { orderId } });
+      navigate(`/driver-delivery-3d/${response.order.id}`);
     } catch (error) {
       console.error('❌ Erreur lors de l\'acceptation:', error);
       alert('Erreur lors de l\'acceptation de la commande. Veuillez réessayer.');
@@ -356,7 +356,7 @@ const LivreurDashboard = () => {
                 {activeTab === 'in-progress' && (
                   <button 
                     className="btn-view"
-                    onClick={() => navigate('/driver-delivery', { state: { orderId: order.id } })}
+                    onClick={() => navigate(`/driver-delivery-3d/${order.id}`)}
                   >
                     Voir la livraison
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">

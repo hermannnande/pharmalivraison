@@ -6,6 +6,10 @@ const socketIO = require('socket.io');
 const jwt = require('jsonwebtoken');
 let { users, pharmacies, medications, orders, deliveries, transactions, notifications } = require('./data');
 
+// Services
+const dispatchService = require('./services/dispatchService');
+const courierSimulator = require('./services/courierSimulator');
+
 const app = express();
 const server = http.createServer(app);
 const io = socketIO(server, {
@@ -14,6 +18,7 @@ const io = socketIO(server, {
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static('public')); // Servir les fichiers statiques (admin pages)
 
 // Attacher Socket.IO à l'app Express pour que les routes y accèdent
 app.set('io', io);
@@ -102,6 +107,141 @@ app.get('/api/health', (req, res) => {
 });
 
 // =====================================================
+// ROUTES DISPATCH (Statistiques)
+// =====================================================
+app.get('/api/dispatch/stats', (req, res) => {
+  const stats = dispatchService.getStats();
+  res.json(stats);
+});
+
+// =====================================================
+// ROUTES GOOGLE MAPS API (Proxy)
+// =====================================================
+
+const axios = require('axios');
+const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
+
+// Route: Calculer l'itinéraire avec Google Directions API
+app.get('/api/google-maps/directions', async (req, res) => {
+  try {
+    const { origin, destination, mode = 'driving', departure_time = 'now' } = req.query;
+    
+    if (!origin || !destination) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Paramètres origin et destination requis' 
+      });
+    }
+    
+    if (!GOOGLE_MAPS_API_KEY) {
+      return res.status(500).json({ 
+        success: false,
+        message: 'Clé API Google Maps non configurée'
+      });
+    }
+
+    const url = `https://maps.googleapis.com/maps/api/directions/json?` +
+      `origin=${origin}&` +
+      `destination=${destination}&` +
+      `mode=${mode}&` +
+      `departure_time=${departure_time}&` +
+      `key=${GOOGLE_MAPS_API_KEY}`;
+
+    const response = await axios.get(url);
+    
+    if (response.data.status !== 'OK') {
+      return res.status(400).json({
+        success: false,
+        message: `Erreur Google Maps: ${response.data.status}`
+      });
+    }
+
+    const route = response.data.routes[0];
+    const leg = route.legs[0];
+    
+    // Extraire les coordonnées de la polyline
+    const polyline = decodePolyline(route.overview_polyline.points);
+    
+    res.json({
+      success: true,
+      route: {
+        polyline,
+        distance: {
+          text: leg.distance.text,
+          value: leg.distance.value
+        },
+        duration: {
+          text: leg.duration.text,
+          value: leg.duration.value
+        },
+        duration_in_traffic: leg.duration_in_traffic ? {
+          text: leg.duration_in_traffic.text,
+          value: leg.duration_in_traffic.value
+        } : null,
+        start_address: leg.start_address,
+        end_address: leg.end_address,
+        steps: leg.steps.map(step => ({
+          instruction: step.html_instructions.replace(/<[^>]*>/g, ''),
+          distance: step.distance.text,
+          duration: step.duration.text,
+          start_location: step.start_location,
+          end_location: step.end_location
+        }))
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Erreur Google Directions API:', error.message);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+});
+
+// Fonction pour décoder la polyline Google Maps
+function decodePolyline(encoded) {
+  if (!encoded) return [];
+  
+  const poly = [];
+  let index = 0;
+  const len = encoded.length;
+  let lat = 0;
+  let lng = 0;
+
+  while (index < len) {
+    let b;
+    let shift = 0;
+    let result = 0;
+    
+    do {
+      b = encoded.charCodeAt(index++) - 63;
+      result |= (b & 0x1f) << shift;
+      shift += 5;
+    } while (b >= 0x20);
+    
+    const dlat = ((result & 1) ? ~(result >> 1) : (result >> 1));
+    lat += dlat;
+
+    shift = 0;
+    result = 0;
+    
+    do {
+      b = encoded.charCodeAt(index++) - 63;
+      result |= (b & 0x1f) << shift;
+      shift += 5;
+    } while (b >= 0x20);
+    
+    const dlng = ((result & 1) ? ~(result >> 1) : (result >> 1));
+    lng += dlng;
+
+    poly.push({ lat: lat / 1e5, lng: lng / 1e5 });
+  }
+
+  return poly;
+}
+
+// ==============================================
 // ROUTES AUTHENTIFICATION
 // =====================================================
 
@@ -419,27 +559,57 @@ app.post('/api/orders', (req, res) => {
     
     orders.push(newOrder);
     
-    // Notifier via Socket.IO
-    io.emit('new:order', newOrder);
+    console.log('');
+    console.log('========================================');
+    console.log('📦 NOUVELLE COMMANDE REÇUE');
+    console.log('========================================');
+    console.log('Numéro:', newOrder.orderNumber);
+    console.log('Client:', decoded.phone);
+    console.log('');
     
-    // Créer notification pour livreurs disponibles
-    const availableDrivers = users.filter(u => u.role === 'driver' && u.isAvailable);
-    availableDrivers.forEach(driver => {
-      const notification = {
-        id: String(notifications.length + 1),
-        userId: driver.id,
-        title: 'Nouvelle commande',
-        message: `Nouvelle commande ${newOrder.orderNumber} disponible`,
-        type: 'order',
-        isRead: false,
-        createdAt: new Date()
+    // DISPATCH AUTOMATIQUE vers le meilleur livreur
+    if (req.body.deliveryLocation || req.body.clientLocation) {
+      const orderForDispatch = {
+        id: newOrder.id,
+        orderNumber: newOrder.orderNumber,
+        clientName: decoded.firstName + ' ' + decoded.lastName,
+        clientPhone: decoded.phone,
+        clientAddress: req.body.deliveryAddress,
+        clientLocation: req.body.deliveryLocation || req.body.clientLocation,
+        pharmacyName: req.body.pharmacyName,
+        pharmacyAddress: req.body.pharmacyAddress,
+        pharmacyLocation: req.body.pharmacyLocation,
+        medications: req.body.medications,
+        orderType: req.body.orderType,
+        medicationList: req.body.medicationList,
+        symptoms: req.body.symptoms,
+        notes: req.body.notes,
+        totalPrice: req.body.totalPrice || 0,
+        deliveryFee: req.body.deliveryFee || 1000,
+        isUrgent: req.body.isUrgent || false,
+        forOther: req.body.forOther || false
       };
-      notifications.push(notification);
-      io.to(driver.id).emit('new:notification', notification);
-    });
+      
+      const dispatchResult = dispatchService.dispatchOrder(orderForDispatch, io);
+      
+      if (dispatchResult.success) {
+        console.log('✅ Commande dispatchée avec succès');
+        console.log(`   Livreur: ${dispatchResult.courier.firstName} ${dispatchResult.courier.lastName}`);
+        console.log(`   Distance: ${dispatchResult.distance} km`);
+        console.log(`   ETA: ${dispatchResult.estimatedTime} min`);
+      } else {
+        console.log('⚠️ Dispatch échoué:', dispatchResult.message);
+        // Fallback: notifier tous les livreurs
+        io.emit('new:order', newOrder);
+      }
+    } else {
+      // Pas de position: broadcast à tous
+      io.emit('new:order', newOrder);
+    }
     
     res.status(201).json({ success: true, order: newOrder });
   } catch (error) {
+    console.error('❌ Erreur création commande:', error);
     res.status(401).json({ success: false, message: 'Token invalide' });
   }
 });
@@ -503,22 +673,26 @@ app.post('/api/deliveries/:id/accept', (req, res) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret-dev-key');
     
-    const order = orders.find(o => o.id === req.params.id);
+    // Chercher par ID ou par orderNumber
+    const order = orders.find(o => o.id === req.params.id || o.orderNumber === req.params.id);
+    
     if (!order) {
+      console.log('❌ Commande non trouvée:', req.params.id);
+      console.log('   Commandes disponibles:', orders.map(o => ({ id: o.id, orderNumber: o.orderNumber })));
       return res.status(404).json({
         success: false,
         message: 'Commande non trouvée'
       });
     }
     
-    order.livreurId = decoded.userId;
+    order.livreurId = decoded.id;
     order.status = 'accepted';
     order.acceptedAt = new Date();
     
     const newDelivery = {
       id: String(deliveries.length + 1),
       orderId: order.id,
-      livreurId: decoded.userId,
+      livreurId: decoded.id,
       status: 'accepted',
       currentLocation: order.pharmacyLocation,
       startLocation: order.pharmacyLocation,
@@ -534,13 +708,13 @@ app.post('/api/deliveries/:id/accept', (req, res) => {
     console.log(`📡 [BACKEND] Émission événements d'acceptation - Commande ${order.id}`);
     
     // Émettre événement spécifique à la commande
-    io.emit(`order:${order.id}:accepted`, { orderId: order.id, livreurId: decoded.userId });
+    io.emit(`order:${order.id}:accepted`, { orderId: order.id, livreurId: decoded.id });
     
     // Émettre événement global pour le client
     io.emit('order:accepted', { 
       orderId: order.id, 
       orderNumber: order.orderNumber,
-      livreurId: decoded.userId,
+      livreurId: decoded.id,
       clientId: order.clientId
     });
     
@@ -548,8 +722,75 @@ app.post('/api/deliveries/:id/accept', (req, res) => {
     
     res.json({ success: true, delivery: newDelivery, order });
   } catch (error) {
+    console.error('❌ Erreur acceptation:', error);
     res.status(401).json({ success: false, message: 'Token invalide' });
   }
+});
+
+// Démarrer la livraison (partir vers la pharmacie)
+app.put('/api/deliveries/:id/start', (req, res) => {
+  const delivery = deliveries.find(d => d.orderId === req.params.id);
+  
+  if (!delivery) {
+    return res.status(404).json({
+      success: false,
+      message: 'Livraison non trouvée'
+    });
+  }
+  
+  delivery.status = 'to-pharmacy';
+  const order = orders.find(o => o.id === delivery.orderId);
+  if (order) {
+    order.status = 'to-pharmacy';
+  }
+  
+  io.emit(`delivery:${delivery.orderId}:status`, { orderId: delivery.orderId, status: 'to-pharmacy' });
+  
+  res.json({ success: true, delivery, order });
+});
+
+// Arriver à la pharmacie
+app.put('/api/deliveries/:id/arrive-pharmacy', (req, res) => {
+  const delivery = deliveries.find(d => d.orderId === req.params.id);
+  
+  if (!delivery) {
+    return res.status(404).json({
+      success: false,
+      message: 'Livraison non trouvée'
+    });
+  }
+  
+  delivery.status = 'at-pharmacy';
+  const order = orders.find(o => o.id === delivery.orderId);
+  if (order) {
+    order.status = 'at-pharmacy';
+  }
+  
+  io.emit(`delivery:${delivery.orderId}:status`, { orderId: delivery.orderId, status: 'at-pharmacy' });
+  
+  res.json({ success: true, delivery, order });
+});
+
+// Récupérer les médicaments
+app.put('/api/deliveries/:id/pickup', (req, res) => {
+  const delivery = deliveries.find(d => d.orderId === req.params.id);
+  
+  if (!delivery) {
+    return res.status(404).json({
+      success: false,
+      message: 'Livraison non trouvée'
+    });
+  }
+  
+  delivery.status = 'to-client';
+  const order = orders.find(o => o.id === delivery.orderId);
+  if (order) {
+    order.status = 'to-client';
+  }
+  
+  io.emit(`delivery:${delivery.orderId}:status`, { orderId: delivery.orderId, status: 'to-client' });
+  
+  res.json({ success: true, delivery, order });
 });
 
 // Mettre à jour la position du livreur
@@ -873,4 +1114,7 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log('');
   console.log(`🔗 Test: http://localhost:${PORT}/api/health`);
   console.log('');
+  
+  // Démarrer le simulateur de livreurs
+  courierSimulator.startSimulation();
 });

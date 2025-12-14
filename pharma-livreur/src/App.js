@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './pages/Login';
 import LivreurDashboard from './pages/LivreurDashboard';
 import DriverDelivery from './pages/DriverDelivery';
+import DriverDeliveryGoogleMaps from './pages/DriverDeliveryGoogleMaps';
 import Menu from './pages/Menu';
 import Wallet from './pages/Wallet';
 import Statistics from './pages/Statistics';
@@ -18,6 +19,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/livreur-dashboard" element={<LivreurDashboard />} />
           <Route path="/driver-delivery" element={<DriverDelivery />} />
+          <Route path="/driver-delivery-3d/:orderId" element={<DriverDeliveryGoogleMaps />} />
           <Route path="/menu" element={<Menu />} />
           <Route path="/wallet" element={<Wallet />} />
           <Route path="/statistics" element={<Statistics />} />

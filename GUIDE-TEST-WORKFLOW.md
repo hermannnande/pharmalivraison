@@ -301,3 +301,6 @@ Le client peut commander, le livreur reçoit instantanément, accepte, et tout l
 
 **Testez dans 2-3 minutes après le redéploiement !** ⏰
 
+
+
+

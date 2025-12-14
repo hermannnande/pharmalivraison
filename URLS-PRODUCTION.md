@@ -177,3 +177,6 @@ Les APK peuvent charger le contenu depuis Vercel :
 
 🎉 **Félicitations ! Votre plateforme PharmaLivraison est en ligne !** 🚀
 
+
+
+

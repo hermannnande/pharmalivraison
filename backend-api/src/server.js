@@ -571,9 +571,9 @@ app.get('/api/orders', (req, res) => {
   }
 });
 
-// Détail d'une commande
+// Détail d'une commande (par id ou orderNumber)
 app.get('/api/orders/:id', (req, res) => {
-  const order = orders.find(o => o.id === req.params.id);
+  const order = orders.find(o => o.id === req.params.id || o.orderNumber === req.params.id);
   
   if (!order) {
     return res.status(404).json({

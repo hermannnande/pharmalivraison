@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { CONFIG } from '../config';
 import { startDelivery, arriveAtPharmacy, pickupDelivery, completeDelivery, getOrderById } from '../services/api';
 import socketService from '../services/socket';
+import DeliveryCompletedModal from '../components/DeliveryCompletedModal';
 import './DriverDeliveryGoogleMaps.css';
 
 const GOOGLE_MAPS_KEY = CONFIG.GOOGLE_MAPS_API_KEY;
@@ -23,6 +24,10 @@ function DriverDeliveryGoogleMaps() {
   const [routeData, setRouteData] = useState(null);
   const [nextTurn, setNextTurn] = useState(null);
   const [speed, setSpeed] = useState(0);
+  
+  // État pour le modal de félicitations
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [completionEarnings, setCompletionEarnings] = useState(0);
 
   // Refs
   const mapRef = useRef(null);
@@ -437,9 +442,18 @@ function DriverDeliveryGoogleMaps() {
           focusOnDriver(true);
           break;
         case 'delivered':
-          await completeDelivery(orderId);
+          const result = await completeDelivery(orderId);
           setDeliveryStatus('delivered');
-          navigate('/livreur-dashboard');
+          
+          // Récupérer le montant gagné et afficher le modal
+          if (result.success && result.order) {
+            const earnings = result.order.deliveryFee * 0.8; // 80% pour le livreur
+            setCompletionEarnings(earnings);
+            setShowCompletionModal(true);
+          } else {
+            // Fallback au dashboard si pas de données
+            navigate('/livreur-dashboard');
+          }
           break;
         default:
           break;
@@ -659,6 +673,17 @@ function DriverDeliveryGoogleMaps() {
           <span className="recenter-icon">📍</span>
         </button>
       )}
+
+      {/* Modal de félicitation */}
+      <DeliveryCompletedModal
+        isOpen={showCompletionModal}
+        onClose={() => {
+          setShowCompletionModal(false);
+          navigate('/livreur-dashboard');
+        }}
+        earnings={completionEarnings}
+        orderNumber={orderDetails?.orderNumber || orderId}
+      />
     </div>
   );
 }

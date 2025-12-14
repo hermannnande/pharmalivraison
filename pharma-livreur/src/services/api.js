@@ -175,7 +175,7 @@ export const pickupDelivery = async (orderId) => {
 // 4. Terminer la livraison
 export const completeDelivery = async (deliveryId) => {
   try {
-    const response = await api.put(`/deliveries/${deliveryId}/complete`);
+    const response = await api.post(`/deliveries/${deliveryId}/complete`);
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: 'Erreur lors de la finalisation de la livraison' };

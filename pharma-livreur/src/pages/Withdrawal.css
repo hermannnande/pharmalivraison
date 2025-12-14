@@ -1,0 +1,386 @@
+.withdrawal-page {
+  min-height: 100vh;
+  background: #f5f7fa;
+  padding-bottom: 100px;
+}
+
+/* Header */
+.withdrawal-header {
+  background: white;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid #e9ecef;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.withdrawal-header h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  flex: 1;
+  text-align: center;
+}
+
+.back-btn {
+  background: #f1f5f9;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #475569;
+  transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+  background: #e2e8f0;
+}
+
+/* Balance Card */
+.balance-card-withdrawal {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  margin: 20px;
+  padding: 32px 24px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+}
+
+.balance-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.balance-label {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 8px;
+}
+
+.balance-amount {
+  font-size: 36px;
+  font-weight: 800;
+  color: white;
+}
+
+/* Sections */
+.withdrawal-section {
+  background: white;
+  margin: 0 20px 16px;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.withdrawal-section h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 16px;
+}
+
+/* Amount Input */
+.amount-input-group {
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.amount-input {
+  width: 100%;
+  padding: 16px;
+  padding-right: 80px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  transition: all 0.3s ease;
+}
+
+.amount-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.amount-currency {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.amount-info {
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 16px;
+}
+
+/* Quick Amounts */
+.quick-amounts {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.quick-amount-btn {
+  padding: 12px;
+  border: 2px solid #e2e8f0;
+  background: white;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.quick-amount-btn:hover:not(:disabled) {
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.quick-amount-btn.active {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+}
+
+.quick-amount-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Method List */
+.method-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.method-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.method-item:hover {
+  border-color: #3b82f6;
+}
+
+.method-item.active {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.method-icon {
+  font-size: 32px;
+}
+
+.method-info {
+  flex: 1;
+}
+
+.method-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 2px;
+}
+
+.method-desc {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.method-check {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #3b82f6;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* Phone Input */
+.phone-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 16px;
+  color: #1e293b;
+  transition: all 0.3s ease;
+}
+
+.phone-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Error Message */
+.error-message {
+  margin: 0 20px 16px;
+  padding: 12px 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  color: #dc2626;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Actions */
+.withdrawal-actions {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px 20px;
+  background: white;
+  border-top: 1px solid #e9ecef;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.04);
+}
+
+.withdraw-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.withdraw-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.withdraw-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-amount {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+/* Info Section */
+.withdrawal-info {
+  margin: 16px 20px 0;
+  padding: 16px;
+  background: #eff6ff;
+  border-radius: 12px;
+  border: 1px solid #dbeafe;
+}
+
+.info-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e40af;
+  margin-bottom: 12px;
+}
+
+.info-list {
+  margin: 0;
+  padding-left: 20px;
+  color: #1e40af;
+  font-size: 13px;
+}
+
+.info-list li {
+  margin-bottom: 6px;
+}
+
+/* Success Screen */
+.success-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px;
+  text-align: center;
+}
+
+.success-icon {
+  font-size: 80px;
+  margin-bottom: 24px;
+  animation: bounceIn 0.6s ease;
+}
+
+@keyframes bounceIn {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.success-screen h2 {
+  font-size: 28px;
+  font-weight: 800;
+  color: #10b981;
+  margin: 0 0 16px;
+}
+
+.success-screen p {
+  font-size: 16px;
+  color: #64748b;
+  margin: 0 0 8px;
+}
+
+.success-amount {
+  font-size: 36px;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 16px 0;
+}
+
+.success-subtitle {
+  font-size: 14px;
+  color: #94a3b8;
+  margin-bottom: 24px;
+}
+
+.success-note {
+  font-size: 13px;
+  color: #3b82f6;
+  font-weight: 600;
+  background: #eff6ff;
+  padding: 12px 20px;
+  border-radius: 12px;
+  margin-top: 16px;
+}
+

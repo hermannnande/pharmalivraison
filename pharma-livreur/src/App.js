@@ -5,6 +5,11 @@ import LivreurDashboard from './pages/LivreurDashboard';
 import DriverDelivery from './pages/DriverDelivery';
 import DriverDeliveryGoogleMaps from './pages/DriverDeliveryGoogleMaps';
 import DriverEarnings from './pages/DriverEarnings';
+import Messages from './pages/Messages';
+import Withdrawal from './pages/Withdrawal';
+import Levels from './pages/Levels';
+import Profile from './pages/Profile';
+import Settings from './pages/Settings';
 import Menu from './pages/Menu';
 import Wallet from './pages/Wallet';
 import Statistics from './pages/Statistics';
@@ -22,15 +27,16 @@ function App() {
           <Route path="/driver-delivery" element={<DriverDelivery />} />
           <Route path="/driver-delivery-3d/:orderId" element={<DriverDeliveryGoogleMaps />} />
           <Route path="/earnings" element={<DriverEarnings />} />
+          <Route path="/messages" element={<Messages />} />
+          <Route path="/withdrawal" element={<Withdrawal />} />
+          <Route path="/levels" element={<Levels />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="/menu" element={<Menu />} />
           <Route path="/wallet" element={<Wallet />} />
           <Route path="/statistics" element={<Statistics />} />
-          <Route path="/chat" element={<ComingSoon title="Chat" />} />
+          <Route path="/chat" element={<Messages />} />
           <Route path="/sos" element={<SOSPage />} />
-          <Route path="/withdrawal" element={<ComingSoon title="Retrait" />} />
-          <Route path="/levels" element={<ComingSoon title="Niveaux" />} />
-          <Route path="/profile" element={<ComingSoon title="Profil" />} />
-          <Route path="/settings" element={<ComingSoon title="Paramètres" />} />
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
       </div>

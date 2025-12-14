@@ -85,11 +85,10 @@ async function findBestCourier(order, io) {
     console.log(`📡 Recherche livreurs dans ${radiusKm} km de la pharmacie...`);
     
     // Informer le client de la progression (radar animé)
-    if (io) {
-      io.emit('courier:search-progress', {
+    if (io && order.clientId) {
+      io.emit(`order:${order.id}:search-progress`, {
         orderId: order.id,
         radius: radiusKm,
-        pharmacyName: order.pharmacyName,
         pharmacyLocation: order.pharmacyLocation
       });
     }
@@ -165,8 +164,8 @@ async function dispatchOrder(order, io) {
     console.log('❌ Impossible de dispatcher: aucun livreur disponible');
     
     // Notifier le client qu'aucun livreur n'est disponible
-    if (io) {
-      io.emit('courier:not-found', {
+    if (io && order.clientId) {
+      io.emit(`order:${order.id}:no-courier`, {
         orderId: order.id,
         message: 'Aucun livreur disponible dans votre zone'
       });
@@ -214,7 +213,7 @@ async function dispatchOrder(order, io) {
     console.log('📡 Envoi notification Socket.IO...');
     
     // Notifier le client que le livreur a été trouvé
-    io.emit('courier:found', {
+    io.emit(`order:${order.id}:courier-found`, {
       orderId: order.id,
       courier: {
         name: `${best.courier.firstName} ${best.courier.lastName}`,

@@ -754,7 +754,7 @@ app.post('/api/orders', async (req, res) => {
         forOther: req.body.forOther || false
       };
       
-      const dispatchResult = dispatchService.dispatchOrder(orderForDispatch, io);
+      const dispatchResult = await dispatchService.dispatchOrder(orderForDispatch, io);
       
       if (dispatchResult.success) {
         console.log('✅ Commande dispatchée avec succès');

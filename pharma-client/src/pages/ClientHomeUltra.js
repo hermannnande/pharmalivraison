@@ -250,21 +250,21 @@ function ClientHomeUltra() {
     console.log('👂 [CLIENT] Ecoute de l\'événement "order:accepted"...');
     socketService.on('order:accepted', handleOrderAccepted);
 
-    // Écouter les événements de recherche de livreur
-    socketService.on('order:search-progress', (data) => {
+    // Écouter les événements de recherche de livreur (avec wildcard pour tous les orderId)
+    socketService.on('courier:search-progress', (data) => {
       console.log('🔍 Progression recherche livreur:', data);
       setIsSearchingCourier(true);
       setSearchRadius(data.radius);
       setSearchPharmacyName(data.pharmacyName || 'la pharmacie');
     });
 
-    socketService.on('order:courier-found', (data) => {
+    socketService.on('courier:found', (data) => {
       console.log('✅ Livreur trouvé:', data);
       setIsSearchingCourier(false);
       // Notification déjà gérée par order:accepted
     });
 
-    socketService.on('order:no-courier', (data) => {
+    socketService.on('courier:not-found', (data) => {
       console.log('❌ Aucun livreur disponible:', data);
       setIsSearchingCourier(false);
       setNotification({

@@ -352,6 +352,7 @@ function ClientHomeUltra() {
   // Recentrer la carte sur le livreur (et la pharmacie) quand on sélectionne une commande
   useEffect(() => {
     focusOnOrder(selectedOrderId, deliveries);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedOrderId, deliveries]);
 
   return (

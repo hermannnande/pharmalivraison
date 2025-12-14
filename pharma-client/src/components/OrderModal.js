@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { createOrder } from '../services/api';
-import socketService from '../services/socket';
 import './OrderModal.css';
 
 function OrderModal({ isOpen, onClose }) {

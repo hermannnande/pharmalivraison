@@ -3,11 +3,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, Polyline } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { PHARMACIES_REELLES } from '../realPharmacies';
 import OrderModal from '../components/OrderModal';
 import DrawerMenu from '../components/DrawerMenu';
 import socketService from '../services/socket';
 import { getOrderById, getDirections } from '../services/api';
+import axios from 'axios';
+import { CONFIG } from '../config';
 import './ClientHomeUltra.css';
 
 // Icône pour la position de l'utilisateur (point bleu)
@@ -123,23 +124,41 @@ function ClientHomeUltra() {
         (position) => {
           const { latitude, longitude } = position.coords;
           setUserPosition([latitude, longitude]);
+          // Charger les vraies pharmacies depuis Google Places
+          loadRealPharmacies(latitude, longitude);
         },
         (error) => {
           console.log('Géolocalisation désactivée, utilisation de la position par défaut');
+          // Charger les pharmacies avec position par défaut
+          loadRealPharmacies();
         }
       );
+    } else {
+      loadRealPharmacies();
     }
 
-    // Filtrer les pharmacies proches
-    let pharmacies = PHARMACIES_REELLES.slice(0, 18);
-    
-    // Ajouter aléatoirement le statut "de garde" à quelques pharmacies (simulation)
-    pharmacies = pharmacies.map((p, index) => ({
-      ...p,
-      isDeGarde: index % 4 === 0 || index % 7 === 0 // Environ 25% sont de garde
-    }));
-    
-    setNearbyPharmacies(pharmacies);
+    // Fonction pour charger les vraies pharmacies via API
+    async function loadRealPharmacies(lat = 5.3600, lng = -4.0083) {
+      try {
+        console.log('🔍 Chargement pharmacies réelles depuis Google Places...');
+        const response = await axios.get(`${CONFIG.API_URL}/pharmacies`, {
+          params: {
+            useRealData: 'true',
+            lat,
+            lng
+          }
+        });
+        
+        if (response.data.success && response.data.pharmacies) {
+          console.log(`✅ ${response.data.pharmacies.length} pharmacies chargées (source: ${response.data.source})`);
+          setNearbyPharmacies(response.data.pharmacies);
+        }
+      } catch (error) {
+        console.error('❌ Erreur chargement pharmacies:', error);
+        // Fallback: pas de pharmacies plutôt que des fausses données
+        setNearbyPharmacies([]);
+      }
+    }
 
     // Connecter Socket.IO et écouter les événements d'acceptation
     console.log('🔌 [CLIENT] Initialisation Socket.IO...');

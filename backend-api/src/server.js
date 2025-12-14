@@ -121,6 +121,9 @@ app.get('/api/dispatch/stats', (req, res) => {
 const axios = require('axios');
 const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
 
+// Service Places pour pharmacies réelles
+const placesService = require('./services/placesService');
+
 // Route: Calculer l'itinéraire avec Google Directions API
 app.get('/api/google-maps/directions', async (req, res) => {
   try {
@@ -380,55 +383,126 @@ app.post('/api/auth/register', (req, res) => {
 // ROUTES PHARMACIES
 // =====================================================
 
-// Liste des pharmacies
-app.get('/api/pharmacies', (req, res) => {
-  const { search, isOpen, is24h, isOnGuard } = req.query;
-  
-  let results = [...pharmacies];
-  
-  if (search) {
-    results = results.filter(p => 
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.address.toLowerCase().includes(search.toLowerCase())
-    );
+// Liste des pharmacies (données réelles Google Places)
+app.get('/api/pharmacies', async (req, res) => {
+  try {
+    const { search, isOpen, is24h, isOnGuard, lat, lng, useRealData } = req.query;
+    
+    // Si useRealData=true, utiliser Google Places API
+    if (useRealData === 'true') {
+      const latitude = lat ? parseFloat(lat) : 5.3600;
+      const longitude = lng ? parseFloat(lng) : -4.0083;
+      
+      console.log(`🔍 Recherche pharmacies réelles (lat: ${latitude}, lng: ${longitude})`);
+      const result = await placesService.getNearbyPharmacies(latitude, longitude);
+      
+      if (!result.success) {
+        // Fallback sur données locales en cas d'erreur
+        console.warn('⚠️ Fallback sur données locales');
+        return res.json({ success: true, pharmacies: pharmacies, source: 'local' });
+      }
+      
+      // Filtrer selon les critères
+      let results = result.pharmacies;
+      
+      if (search) {
+        results = results.filter(p => 
+          p.name.toLowerCase().includes(search.toLowerCase()) ||
+          p.address.toLowerCase().includes(search.toLowerCase())
+        );
+      }
+      
+      if (isOpen === 'true') {
+        results = results.filter(p => p.isOpen);
+      }
+      
+      if (isOnGuard === 'true') {
+        results = results.filter(p => p.isDeGarde);
+      }
+      
+      return res.json({ 
+        success: true, 
+        pharmacies: results, 
+        total: results.length,
+        source: 'google_places' 
+      });
+    }
+    
+    // Sinon, utiliser les données locales (comportement par défaut)
+    let results = [...pharmacies];
+    
+    if (search) {
+      results = results.filter(p => 
+        p.name.toLowerCase().includes(search.toLowerCase()) ||
+        p.address.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+    
+    if (isOpen === 'true') {
+      results = results.filter(p => p.isOpen);
+    }
+    
+    if (is24h === 'true') {
+      results = results.filter(p => p.is24h);
+    }
+    
+    if (isOnGuard === 'true') {
+      results = results.filter(p => p.isOnGuard);
+    }
+    
+    res.json({ success: true, pharmacies: results, source: 'local' });
+  } catch (error) {
+    console.error('❌ Erreur liste pharmacies:', error);
+    // Fallback sur données locales
+    res.json({ success: true, pharmacies: pharmacies, source: 'local' });
   }
-  
-  if (isOpen === 'true') {
-    results = results.filter(p => p.isOpen);
-  }
-  
-  if (is24h === 'true') {
-    results = results.filter(p => p.is24h);
-  }
-  
-  if (isOnGuard === 'true') {
-    results = results.filter(p => p.isOnGuard);
-  }
-  
-  res.json({ success: true, pharmacies: results });
 });
 
-// Détail d'une pharmacie
-app.get('/api/pharmacies/:id', (req, res) => {
-  const pharmacy = pharmacies.find(p => p.id === req.params.id);
-  
-  if (!pharmacy) {
-    return res.status(404).json({
+// Détail d'une pharmacie (Google Places ou local)
+app.get('/api/pharmacies/:id', async (req, res) => {
+  try {
+    // Si l'ID ressemble à un place_id Google (commence par ChIJ ou similaire)
+    if (req.params.id.length > 20) {
+      console.log(`🔍 Récupération détails pharmacie Google: ${req.params.id}`);
+      const result = await placesService.getPharmacyDetails(req.params.id);
+      
+      if (result.success) {
+        return res.json({
+          success: true,
+          pharmacy: result.pharmacy,
+          source: 'google_places'
+        });
+      }
+    }
+    
+    // Sinon recherche locale
+    const pharmacy = pharmacies.find(p => p.id === req.params.id);
+    
+    if (!pharmacy) {
+      return res.status(404).json({
+        success: false,
+        message: 'Pharmacie non trouvée'
+      });
+    }
+    
+    // Ajouter les médicaments de cette pharmacie
+    const pharmacyMedications = medications.filter(m => m.pharmacyId === pharmacy.id);
+    
+    res.json({
+      success: true,
+      pharmacy: {
+        ...pharmacy,
+        medications: pharmacyMedications
+      },
+      source: 'local'
+    });
+  } catch (error) {
+    console.error('❌ Erreur détail pharmacie:', error);
+    res.status(500).json({
       success: false,
-      message: 'Pharmacie non trouvée'
+      message: 'Erreur serveur'
     });
   }
-  
-  // Ajouter les médicaments de cette pharmacie
-  const pharmacyMedications = medications.filter(m => m.pharmacyId === pharmacy.id);
-  
-  res.json({
-    success: true,
-    pharmacy: {
-      ...pharmacy,
-      medications: pharmacyMedications
-    }
-  });
 });
 
 // =====================================================

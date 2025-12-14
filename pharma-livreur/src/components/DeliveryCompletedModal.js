@@ -7,6 +7,9 @@ const DeliveryCompletedModal = ({ isOpen, onClose, earnings, orderNumber }) => {
   
   if (!isOpen) return null;
 
+  // S'assurer que earnings est un nombre valide
+  const safeEarnings = isNaN(earnings) || !earnings ? 0 : Math.round(earnings);
+
   const handleViewEarnings = () => {
     onClose();
     navigate('/earnings');
@@ -45,8 +48,8 @@ const DeliveryCompletedModal = ({ isOpen, onClose, earnings, orderNumber }) => {
         {/* Montant gagné */}
         <div className="earnings-display">
           <div className="earnings-label">Vous avez gagné</div>
-          <div className="earnings-amount">{earnings.toLocaleString('fr-FR')} FCFA</div>
-          <div className="earnings-badge">+{earnings} FCFA</div>
+          <div className="earnings-amount">{safeEarnings.toLocaleString('fr-FR')} FCFA</div>
+          <div className="earnings-badge">+{safeEarnings} FCFA</div>
         </div>
 
         {/* Statistiques rapides */}

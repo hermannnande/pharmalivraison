@@ -447,11 +447,14 @@ function DriverDeliveryGoogleMaps() {
           
           // Récupérer le montant gagné et afficher le modal
           if (result.success && result.order) {
-            const earnings = result.order.deliveryFee * 0.8; // 80% pour le livreur
+            const deliveryFee = result.order.deliveryFee || 1000; // Fallback à 1000 FCFA
+            const earnings = Math.round(deliveryFee * 0.8); // 80% pour le livreur
+            console.log('💰 Gains calculés:', earnings, 'FCFA (80% de', deliveryFee, 'FCFA)');
             setCompletionEarnings(earnings);
             setShowCompletionModal(true);
           } else {
             // Fallback au dashboard si pas de données
+            console.warn('⚠️ Pas de données de commande, retour au dashboard');
             navigate('/livreur-dashboard');
           }
           break;

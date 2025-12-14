@@ -1,0 +1,225 @@
+/* Radar de recherche de livreur */
+.courier-search-radar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease;
+}
+
+.radar-container {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  margin-bottom: 30px;
+}
+
+/* Cercles du radar */
+.radar-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 2px solid #4caf50;
+  border-radius: 50%;
+  opacity: 0.3;
+}
+
+.radar-circle-1 {
+  width: 100px;
+  height: 100px;
+}
+
+.radar-circle-2 {
+  width: 180px;
+  height: 180px;
+}
+
+.radar-circle-3 {
+  width: 260px;
+  height: 260px;
+}
+
+/* Rayon du radar (animation rotative) */
+.radar-beam {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 130px;
+  background: linear-gradient(to top, transparent, #4caf50);
+  transform-origin: bottom center;
+  animation: radarScan 2s linear infinite;
+}
+
+@keyframes radarScan {
+  from {
+    transform: translateX(-50%) rotate(0deg);
+  }
+  to {
+    transform: translateX(-50%) rotate(360deg);
+  }
+}
+
+/* Centre du radar (pharmacie) */
+.radar-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  background: #4caf50;
+  border-radius: 50%;
+  box-shadow: 0 0 20px #4caf50;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.radar-center::before {
+  content: '🏥';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px #4caf50;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    box-shadow: 0 0 40px #4caf50;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+}
+
+/* Points de livreurs (simulation) */
+.radar-dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #ff9800;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #ff9800;
+  animation: blinkDot 1s ease-in-out infinite;
+}
+
+@keyframes blinkDot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* Texte d'info */
+.radar-info {
+  text-align: center;
+  color: white;
+}
+
+.radar-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 10px 0;
+  color: #4caf50;
+}
+
+.radar-subtitle {
+  font-size: 16px;
+  font-weight: 400;
+  margin: 0 0 20px 0;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.radar-radius {
+  font-size: 20px;
+  font-weight: 700;
+  color: #4caf50;
+  margin: 0;
+  animation: fadeInOut 1s ease-in-out infinite;
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.radar-status {
+  margin-top: 10px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Animation de chargement */
+.radar-loader {
+  margin-top: 20px;
+  display: flex;
+  gap: 8px;
+}
+
+.loader-dot {
+  width: 10px;
+  height: 10px;
+  background: #4caf50;
+  border-radius: 50%;
+  animation: bounce 1.4s ease-in-out infinite;
+}
+
+.loader-dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.loader-dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes bounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+/* État "Livreur trouvé" */
+.radar-success {
+  animation: successPulse 0.5s ease;
+}
+
+@keyframes successPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.success-message {
+  font-size: 18px;
+  color: #4caf50;
+  font-weight: 700;
+  margin-top: 20px;
+  animation: slideInUp 0.5s ease;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+

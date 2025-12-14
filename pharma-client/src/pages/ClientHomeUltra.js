@@ -5,6 +5,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import OrderModal from '../components/OrderModal';
 import DrawerMenu from '../components/DrawerMenu';
+import CourierSearchRadar from '../components/CourierSearchRadar';
 import socketService from '../services/socket';
 import { getOrderById, getDirections } from '../services/api';
 import axios from 'axios';
@@ -78,6 +79,11 @@ function ClientHomeUltra() {
   const [showOnlyDeGarde, setShowOnlyDeGarde] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [notification, setNotification] = useState(null);
+
+  // États pour le radar de recherche de livreur
+  const [isSearchingCourier, setIsSearchingCourier] = useState(false);
+  const [searchRadius, setSearchRadius] = useState(5);
+  const [searchPharmacyName, setSearchPharmacyName] = useState('');
 
   // Gérer la sélection de pharmacie sur la carte
   const handlePharmacyClick = (pharmacy) => {
@@ -243,6 +249,32 @@ function ClientHomeUltra() {
     // Solution: Écouter l'événement générique
     console.log('👂 [CLIENT] Ecoute de l\'événement "order:accepted"...');
     socketService.on('order:accepted', handleOrderAccepted);
+
+    // Écouter les événements de recherche de livreur
+    socketService.on('order:search-progress', (data) => {
+      console.log('🔍 Progression recherche livreur:', data);
+      setIsSearchingCourier(true);
+      setSearchRadius(data.radius);
+      setSearchPharmacyName(data.pharmacyName || 'la pharmacie');
+    });
+
+    socketService.on('order:courier-found', (data) => {
+      console.log('✅ Livreur trouvé:', data);
+      setIsSearchingCourier(false);
+      // Notification déjà gérée par order:accepted
+    });
+
+    socketService.on('order:no-courier', (data) => {
+      console.log('❌ Aucun livreur disponible:', data);
+      setIsSearchingCourier(false);
+      setNotification({
+        type: 'error',
+        title: '❌ Aucun livreur disponible',
+        message: 'Aucun livreur n\'est disponible dans votre zone actuellement. Veuillez réessayer dans quelques instants.',
+        showTrackButton: false
+      });
+      setTimeout(() => setNotification(null), 8000);
+    });
 
     // Écouter les mises à jour de statut de livraison
     const handleStatusUpdate = (data) => {
@@ -452,6 +484,13 @@ function ClientHomeUltra() {
         selectedPharmacy={selectedPharmacy}
         nearbyPharmacies={nearbyPharmacies}
         userPosition={userPosition}
+      />
+
+      {/* Radar de recherche de livreur */}
+      <CourierSearchRadar 
+        isSearching={isSearchingCourier}
+        currentRadius={searchRadius}
+        pharmacyName={searchPharmacyName}
       />
 
       {/* En-tête moderne */}

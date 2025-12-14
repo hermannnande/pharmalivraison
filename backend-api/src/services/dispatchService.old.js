@@ -1,7 +1,8 @@
 // =====================================================
-// SERVICE DE DISPATCH AUTOMATIQUE V2
-// Recherche en cascade autour de la PHARMACIE: 5→10→15km
+// SERVICE DE DISPATCH AUTOMATIQUE
 // =====================================================
+
+const io = require('../server').io;
 
 // Stockage des livraisons en attente
 const pendingDeliveries = new Map();
@@ -37,7 +38,14 @@ function haversineDistance(lat1, lon1, lat2, lon2) {
 /**
  * Calculer le score d'un livreur pour une commande
  */
-function calculateCourierScore(courier, distance) {
+function calculateCourierScore(courier, order) {
+  const distance = haversineDistance(
+    courier.location.lat,
+    courier.location.lng,
+    order.clientLocation.lat,
+    order.clientLocation.lng
+  );
+
   // Score basé sur :
   // - Distance (poids 60%)
   // - Note du livreur (poids 20%)
@@ -60,15 +68,14 @@ function calculateCourierScore(courier, distance) {
 
 /**
  * Trouver le meilleur livreur pour une commande
- * Recherche en cascade autour de la PHARMACIE : 5km → 10km → 15km
  */
-async function findBestCourier(order, io) {
+function findBestCourier(order) {
   console.log('');
   console.log('========================================');
   console.log('🔍 RECHERCHE DU MEILLEUR LIVREUR');
   console.log('========================================');
   console.log('Commande:', order.id);
-  console.log('Position pharmacie:', order.pharmacyLocation);
+  console.log('Position client:', order.clientLocation);
   console.log('Livreurs en ligne:', onlineCouriers.size);
   console.log('');
 
@@ -77,104 +84,59 @@ async function findBestCourier(order, io) {
     return null;
   }
 
-  // Rayons de recherche en mètres : 5km → 10km → 15km
-  const searchRadii = [5000, 10000, 15000];
+  // Calculer le score de chaque livreur
+  const scoredCouriers = [];
   
-  for (const radius of searchRadii) {
-    const radiusKm = radius / 1000;
-    console.log(`📡 Recherche livreurs dans ${radiusKm} km de la pharmacie...`);
-    
-    // Informer le client de la progression (radar animé)
-    if (io && order.clientId) {
-      io.emit(`order:${order.id}:search-progress`, {
-        orderId: order.id,
-        radius: radiusKm,
-        pharmacyLocation: order.pharmacyLocation
-      });
-    }
-
-    // Filtrer les livreurs dans le rayon
-    const nearbyScores = [];
-    
-    onlineCouriers.forEach((courier, courierId) => {
-      if (courier.isAvailable && courier.location) {
-        // Distance entre le LIVREUR et la PHARMACIE
-        const distance = haversineDistance(
-          courier.location.lat,
-          courier.location.lng,
-          order.pharmacyLocation.lat,
-          order.pharmacyLocation.lng
-        );
-
-        // Si dans le rayon actuel
-        if (distance <= radius) {
-          const score = calculateCourierScore(courier, distance);
-          nearbyScores.push(score);
-          console.log(`   ✓ ${courier.firstName} ${courier.lastName}:`);
-          console.log(`     Distance de pharmacie: ${score.distanceKm} km`);
-          console.log(`     ETA: ${score.estimatedTime} min`);
-          console.log(`     Score: ${score.score.toFixed(2)}/100`);
-        }
-      }
-    });
-
-    // Si livreurs trouvés dans ce rayon
-    if (nearbyScores.length > 0) {
-      // Trier par score décroissant
-      nearbyScores.sort((a, b) => b.score - a.score);
-      const best = nearbyScores[0];
-      
+  onlineCouriers.forEach((courier, courierId) => {
+    if (courier.isAvailable) {
+      const score = calculateCourierScore(courier, order);
+      scoredCouriers.push(score);
+      console.log(`📊 ${courier.firstName} ${courier.lastName}:`);
+      console.log(`   Distance: ${score.distanceKm} km`);
+      console.log(`   ETA: ${score.estimatedTime} min`);
+      console.log(`   Score: ${score.score.toFixed(2)}/100`);
       console.log('');
-      console.log(`✅ Meilleur livreur trouvé à ${radiusKm} km:`);
-      console.log(`   ${best.courier.firstName} ${best.courier.lastName}`);
-      console.log(`   Distance: ${best.distanceKm} km`);
-      console.log(`   ETA: ${best.estimatedTime} min`);
-      console.log('========================================');
-      
-      return best;
-    } else {
-      console.log(`   ⚠️ Aucun livreur disponible dans ${radiusKm} km`);
-      // Petite pause pour l'effet radar
-      await new Promise(resolve => setTimeout(resolve, 500));
     }
+  });
+
+  if (scoredCouriers.length === 0) {
+    console.log('❌ Aucun livreur disponible');
+    return null;
   }
 
-  // Aucun livreur trouvé après toutes les tentatives
+  // Trier par score (le plus haut en premier)
+  scoredCouriers.sort((a, b) => b.score - a.score);
+
+  const best = scoredCouriers[0];
+  console.log('✅ MEILLEUR LIVREUR TROUVÉ:');
+  console.log(`   ${best.courier.firstName} ${best.courier.lastName}`);
+  console.log(`   Distance: ${best.distanceKm} km`);
+  console.log(`   ETA: ${best.estimatedTime} min`);
+  console.log(`   Score: ${best.score.toFixed(2)}/100`);
   console.log('');
-  console.log('❌ AUCUN LIVREUR DISPONIBLE dans un rayon de 15 km');
-  console.log('========================================');
-  return null;
+
+  return best;
 }
 
 /**
  * Dispatcher une commande au meilleur livreur
  */
-async function dispatchOrder(order, io) {
+function dispatchOrder(order, io) {
   console.log('');
   console.log('========================================');
-  console.log('🚀 DISPATCH AUTOMATIQUE V2');
+  console.log('🚀 DISPATCH AUTOMATIQUE');
   console.log('========================================');
   console.log('Commande:', order.id);
   console.log('');
 
-  // Trouver le meilleur livreur (recherche en cascade)
-  const best = await findBestCourier(order, io);
+  // Trouver le meilleur livreur
+  const best = findBestCourier(order);
 
   if (!best) {
     console.log('❌ Impossible de dispatcher: aucun livreur disponible');
-    
-    // Notifier le client qu'aucun livreur n'est disponible
-    if (io && order.clientId) {
-      io.emit(`order:${order.id}:no-courier`, {
-        orderId: order.id,
-        message: 'Aucun livreur disponible dans votre zone'
-      });
-    }
-    
     return {
       success: false,
-      message: 'Aucun livreur disponible',
-      error: 'NO_COURIER_AVAILABLE'
+      message: 'Aucun livreur disponible'
     };
   }
 
@@ -211,16 +173,6 @@ async function dispatchOrder(order, io) {
   // Envoyer via Socket.IO
   if (io) {
     console.log('📡 Envoi notification Socket.IO...');
-    
-    // Notifier le client que le livreur a été trouvé
-    io.emit(`order:${order.id}:courier-found`, {
-      orderId: order.id,
-      courier: {
-        name: `${best.courier.firstName} ${best.courier.lastName}`,
-        distance: best.distanceKm,
-        eta: best.estimatedTime
-      }
-    });
     
     // Broadcast à tous les livreurs
     io.emit('new:order', offerData);
@@ -263,28 +215,32 @@ function updateCourierLocation(courierId, location) {
   if (courier) {
     courier.location = location;
     onlineCouriers.set(courierId, courier);
-    console.log(`📍 Position livreur ${courierId} mise à jour:`, location);
+    return true;
   }
+  return false;
 }
 
 /**
  * Mettre un livreur en ligne
  */
 function setCourierOnline(courier) {
+  console.log(`✅ Livreur connecté: ${courier.firstName} ${courier.lastName} (${courier.id})`);
   onlineCouriers.set(courier.id, {
     ...courier,
     isAvailable: true,
-    connectedAt: new Date()
+    lastUpdate: new Date()
   });
-  console.log(`✅ Livreur ${courier.firstName} ${courier.lastName} en ligne`);
 }
 
 /**
  * Mettre un livreur hors ligne
  */
 function setCourierOffline(courierId) {
+  const courier = onlineCouriers.get(courierId);
+  if (courier) {
+    console.log(`❌ Livreur déconnecté: ${courier.firstName} ${courier.lastName}`);
+  }
   onlineCouriers.delete(courierId);
-  console.log(`❌ Livreur ${courierId} hors ligne`);
 }
 
 /**
@@ -295,26 +251,37 @@ function getOnlineCouriers() {
 }
 
 /**
- * Obtenir les statistiques de dispatch
+ * Obtenir les statistiques
  */
 function getStats() {
   const avgDistance = dispatchStats.totalDispatched > 0 
-    ? (dispatchStats.totalDistance / dispatchStats.totalDispatched).toFixed(2)
+    ? (dispatchStats.totalDistance / dispatchStats.totalDispatched).toFixed(2) 
     : 0;
-  const avgTime = dispatchStats.totalDispatched > 0
-    ? Math.round(dispatchStats.totalTime / dispatchStats.totalDispatched)
+  
+  const avgTime = dispatchStats.totalDispatched > 0 
+    ? Math.round(dispatchStats.totalTime / dispatchStats.totalDispatched) 
     : 0;
 
   return {
-    totalDispatched: dispatchStats.totalDispatched,
     onlineCouriers: onlineCouriers.size,
-    avgDistance: `${avgDistance} km`,
-    avgTime: `${avgTime} min`
+    pendingDeliveries: pendingDeliveries.size,
+    totalDispatched: dispatchStats.totalDispatched,
+    avgDistance,
+    avgTime,
+    couriers: getOnlineCouriers().map(c => ({
+      id: c.id,
+      name: `${c.firstName} ${c.lastName}`,
+      location: c.location,
+      isAvailable: c.isAvailable,
+      rating: c.rating,
+      totalDeliveries: c.totalDeliveries
+    }))
   };
 }
 
 module.exports = {
   dispatchOrder,
+  findBestCourier,
   updateCourierLocation,
   setCourierOnline,
   setCourierOffline,

@@ -71,11 +71,20 @@ const DriverEarnings = () => {
       .filter(t => t.type === 'withdrawal')
       .reduce((sum, t) => sum + (t.amount || 0), 0);
 
-    return { earnings, withdrawals, deliveries: filtered.filter(t => t.type === 'earning').length };
+    return { 
+      earnings: earnings || 0, 
+      withdrawals: withdrawals || 0, 
+      deliveries: filtered.filter(t => t.type === 'earning').length 
+    };
   };
 
   const stats = calculateEarnings();
   const filteredTransactions = getFilteredTransactions();
+  
+  // Valeurs sécurisées pour l'affichage
+  const safeBalance = balance || 0;
+  const safeEarnings = stats.earnings || 0;
+  const safeDeliveries = stats.deliveries || 0;
 
   const getPeriodLabel = () => {
     switch (period) {
@@ -126,7 +135,7 @@ const DriverEarnings = () => {
       {/* Solde actuel */}
       <div className="balance-card">
         <div className="balance-label">Solde disponible</div>
-        <div className="balance-amount">{balance.toLocaleString('fr-FR')} FCFA</div>
+        <div className="balance-amount">{safeBalance.toLocaleString('fr-FR')} FCFA</div>
         <button className="withdraw-btn">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <path d="M12 4V20M12 4L8 8M12 4L16 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
@@ -155,14 +164,14 @@ const DriverEarnings = () => {
           <div className="stat-card earnings">
             <div className="stat-icon">💰</div>
             <div className="stat-content">
-              <div className="stat-value">+{stats.earnings.toLocaleString('fr-FR')} FCFA</div>
+              <div className="stat-value">+{safeEarnings.toLocaleString('fr-FR')} FCFA</div>
               <div className="stat-label">Gains</div>
             </div>
           </div>
           <div className="stat-card deliveries">
             <div className="stat-icon">📦</div>
             <div className="stat-content">
-              <div className="stat-value">{stats.deliveries}</div>
+              <div className="stat-value">{safeDeliveries}</div>
               <div className="stat-label">Livraisons</div>
             </div>
           </div>
@@ -170,7 +179,7 @@ const DriverEarnings = () => {
             <div className="stat-icon">📊</div>
             <div className="stat-content">
               <div className="stat-value">
-                {stats.deliveries > 0 ? Math.round(stats.earnings / stats.deliveries).toLocaleString('fr-FR') : 0} FCFA
+                {safeDeliveries > 0 ? Math.round(safeEarnings / safeDeliveries).toLocaleString('fr-FR') : 0} FCFA
               </div>
               <div className="stat-label">Moyenne/course</div>
             </div>
@@ -199,7 +208,7 @@ const DriverEarnings = () => {
                 </div>
                 <div className={`transaction-amount ${transaction.type}`}>
                   {transaction.type === 'earning' ? '+' : '-'}
-                  {transaction.amount.toLocaleString('fr-FR')} FCFA
+                  {(transaction.amount || 0).toLocaleString('fr-FR')} FCFA
                 </div>
               </div>
             ))}

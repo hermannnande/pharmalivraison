@@ -1,20 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getTransactions, getWalletBalance } from '../services/api';
 import './Statistics.css';
 
 function Statistics() {
   const navigate = useNavigate();
+  const [period, setPeriod] = useState('month'); // today, week, month, year, all
+  const [transactions, setTransactions] = useState([]);
+  const [balance, setBalance] = useState(0);
+  const [loading, setLoading] = useState(true);
   
   const [stats] = useState({
     totalDeliveries: 247,
-    totalEarnings: 1250000,
     averageRating: 4.8,
     acceptanceRate: 95,
     totalDistance: 1234,
     completionRate: 98,
     averageTime: 28,
-    bestDay: { date: '08/12/2025', count: 25 },
-    bestMonth: { month: 'Novembre 2025', amount: 385000 }
+    bestDay: { date: '08/12/2025', count: 25 }
   });
 
   const [recentPerformance] = useState([
@@ -34,7 +37,101 @@ function Statistics() {
     { stars: 1, count: 2, percentage: 1 }
   ]);
 
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      const [balanceRes, transactionsRes] = await Promise.all([
+        getWalletBalance(),
+        getTransactions()
+      ]);
+
+      if (balanceRes.success) {
+        setBalance(balanceRes.balance || 0);
+      }
+
+      if (transactionsRes.success) {
+        setTransactions(transactionsRes.transactions || []);
+      }
+    } catch (error) {
+      console.error('❌ Erreur chargement données:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Filtrer les transactions par période
+  const getFilteredTransactions = () => {
+    const now = new Date();
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+    return transactions.filter(t => {
+      const transactionDate = new Date(t.date);
+      switch (period) {
+        case 'today':
+          return transactionDate >= startOfDay;
+        case 'week':
+          return transactionDate >= startOfWeek;
+        case 'month':
+          return transactionDate >= startOfMonth;
+        case 'year':
+          return transactionDate >= startOfYear;
+        case 'all':
+        default:
+          return true;
+      }
+    });
+  };
+
+  // Calculer les gains de la période
+  const calculatePeriodEarnings = () => {
+    const filtered = getFilteredTransactions();
+    const earnings = filtered
+      .filter(t => t.type === 'earning')
+      .reduce((sum, t) => sum + (t.amount || 0), 0);
+    
+    const deliveries = filtered.filter(t => t.type === 'earning').length;
+
+    return { earnings: earnings || 0, deliveries: deliveries || 0 };
+  };
+
+  const periodStats = calculatePeriodEarnings();
   const maxDeliveries = Math.max(...recentPerformance.map(m => m.deliveries));
+
+  const getPeriodLabel = () => {
+    switch (period) {
+      case 'today': return "Aujourd'hui";
+      case 'week': return 'Cette semaine';
+      case 'month': return 'Ce mois';
+      case 'year': return 'Cette année';
+      case 'all': return 'Tous les temps';
+      default: return '';
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="statistics-page">
+        <div className="stats-header">
+          <button className="back-btn" onClick={() => navigate(-1)}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M15 18L9 12L15 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <h1>Mes Statistiques</h1>
+          <div style={{ width: '40px' }}></div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: 'white' }}>
+          Chargement...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="statistics-page">
@@ -47,6 +144,43 @@ function Statistics() {
         </button>
         <h1>Mes Statistiques</h1>
         <div style={{ width: '40px' }}></div>
+      </div>
+
+      {/* Filtres de période */}
+      <div className="period-filters">
+        {['today', 'week', 'month', 'year', 'all'].map((p) => (
+          <button
+            key={p}
+            className={`period-btn ${period === p ? 'active' : ''}`}
+            onClick={() => setPeriod(p)}
+          >
+            {p === 'today' ? 'Jour' : p === 'week' ? 'Semaine' : p === 'month' ? 'Mois' : p === 'year' ? 'Année' : 'Tout'}
+          </button>
+        ))}
+      </div>
+
+      {/* Section Gains de la période */}
+      <div className="period-earnings-section">
+        <h2>{getPeriodLabel()}</h2>
+        <div className="period-earnings-grid">
+          <div className="period-card earnings">
+            <div className="period-icon">💰</div>
+            <div className="period-value">+{periodStats.earnings.toLocaleString('fr-FR')} FCFA</div>
+            <div className="period-label">Gains</div>
+          </div>
+          <div className="period-card deliveries">
+            <div className="period-icon">📦</div>
+            <div className="period-value">{periodStats.deliveries}</div>
+            <div className="period-label">Livraisons</div>
+          </div>
+          <div className="period-card average">
+            <div className="period-icon">📊</div>
+            <div className="period-value">
+              {periodStats.deliveries > 0 ? Math.round(periodStats.earnings / periodStats.deliveries).toLocaleString('fr-FR') : 0} FCFA
+            </div>
+            <div className="period-label">Moyenne/course</div>
+          </div>
+        </div>
       </div>
 
       {/* Main Stats Cards */}
@@ -123,8 +257,8 @@ function Statistics() {
         <div className="stat-row">
           <div className="stat-row-icon">💰</div>
           <div className="stat-row-info">
-            <div className="stat-row-label">Meilleur mois</div>
-            <div className="stat-row-value">{new Intl.NumberFormat('fr-FR').format(stats.bestMonth.amount)} FCFA · {stats.bestMonth.month}</div>
+            <div className="stat-row-label">Solde disponible</div>
+            <div className="stat-row-value">{balance.toLocaleString('fr-FR')} FCFA</div>
           </div>
         </div>
       </div>
@@ -147,17 +281,6 @@ function Statistics() {
               <div className="rating-count">{rating.count}</div>
             </div>
           ))}
-        </div>
-      </div>
-
-      {/* Total Earnings Card */}
-      <div className="earnings-card">
-        <div className="earnings-icon">💎</div>
-        <div className="earnings-info">
-          <div className="earnings-label">Gains totaux</div>
-          <div className="earnings-value">
-            {new Intl.NumberFormat('fr-FR').format(stats.totalEarnings)} FCFA
-          </div>
         </div>
       </div>
     </div>

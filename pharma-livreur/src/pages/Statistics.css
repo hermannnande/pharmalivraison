@@ -1,10 +1,40 @@
-﻿.statistics-page{min-height:100vh;background:#f8f9fa;padding-bottom:20px}
+﻿.statistics-page{min-height:100vh;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);padding-bottom:20px}
 
-.stats-header{background:white;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,0.04);position:sticky;top:0;z-index:100;border-bottom:1px solid #e9ecef}
+.stats-header{background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(255,255,255,0.1)}
 
-.stats-header h1{font-size:20px;font-weight:700;color:#212529;margin:0;flex:1;text-align:center}
+.stats-header h1{font-size:20px;font-weight:700;color:white;margin:0;flex:1;text-align:center}
 
-.main-stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:20px;margin-bottom:20px}
+.back-btn{background:rgba(255,255,255,0.2);border:none;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;transition:all 0.3s ease}
+
+.back-btn:hover{background:rgba(255,255,255,0.3);transform:scale(1.05)}
+
+/* Filtres de période */
+.period-filters{display:flex;gap:8px;padding:20px 20px 0;overflow-x:auto;margin-bottom:16px}
+
+.period-btn{background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);color:white;padding:10px 20px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.3s ease;white-space:nowrap}
+
+.period-btn:hover{background:rgba(255,255,255,0.3)}
+
+.period-btn.active{background:white;color:#667eea;border-color:white}
+
+/* Section Gains de la période */
+.period-earnings-section{padding:0 20px;margin-bottom:24px}
+
+.period-earnings-section h2{color:white;font-size:18px;font-weight:700;margin:0 0 16px}
+
+.period-earnings-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+
+.period-card{background:rgba(255,255,255,0.15);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2);border-radius:16px;padding:16px 12px;text-align:center;transition:all 0.3s ease}
+
+.period-card:hover{background:rgba(255,255,255,0.2);transform:translateY(-4px)}
+
+.period-icon{font-size:32px;margin-bottom:8px}
+
+.period-value{font-size:20px;font-weight:700;color:white;margin-bottom:4px}
+
+.period-label{font-size:11px;color:rgba(255,255,255,0.8);font-weight:600}
+
+.main-stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:0 20px;margin-bottom:20px}
 
 .stat-card{background:white;border-radius:16px;padding:24px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,0.06);transition:all 0.3s ease;border:1px solid #e9ecef}
 
@@ -21,7 +51,7 @@
 .stat-card.warning .stat-value{color:#f59e0b}
 .stat-card.info .stat-value{color:#8b5cf6}
 
-.performance-section,.rating-section{background:white;margin:0 20px 20px;padding:20px;border-radius:16px;box-shadow:0 2px 6px rgba(0,0,0,0.06);border:1px solid #e9ecef}
+.performance-section,.rating-section{background:white;margin:0 20px 20px;padding:20px;border-radius:16px;box-shadow:0 4px 12px rgba(0,0,0,0.1);border:1px solid rgba(0,0,0,0.05)}
 
 .performance-section h2,.rating-section h2{font-size:16px;font-weight:700;color:#212529;margin:0 0 20px 0}
 
@@ -33,7 +63,7 @@
 
 .performance-label{font-size:12px;color:#6c757d;margin-top:8px;font-weight:600}
 
-.additional-stats{background:white;margin:0 20px 20px;border-radius:16px;box-shadow:0 2px 6px rgba(0,0,0,0.06);overflow:hidden;border:1px solid #e9ecef}
+.additional-stats{background:white;margin:0 20px 20px;border-radius:16px;box-shadow:0 4px 12px rgba(0,0,0,0.1);overflow:hidden;border:1px solid rgba(0,0,0,0.05)}
 
 .stat-row{display:flex;align-items:center;gap:14px;padding:16px 20px;border-bottom:1px solid #e9ecef}
 

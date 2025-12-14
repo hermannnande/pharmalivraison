@@ -12,7 +12,7 @@ const DeliveryCompletedModal = ({ isOpen, onClose, earnings, orderNumber }) => {
 
   const handleViewEarnings = () => {
     onClose();
-    navigate('/earnings');
+    navigate('/statistics');
   };
 
   return (

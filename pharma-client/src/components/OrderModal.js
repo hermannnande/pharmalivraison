@@ -10,8 +10,19 @@ function OrderModal({ isOpen, onClose, selectedPharmacy, nearbyPharmacies, userP
   const [forOther, setForOther] = useState(false);
   const [recipientName, setRecipientName] = useState('');
   const [recipientPhone, setRecipientPhone] = useState('');
-  // Utiliser la pharmacie passée en prop (sélectionnée sur la carte)
-  const chosenPharmacy = selectedPharmacy;
+  // État local pour gérer la pharmacie sélectionnée
+  const [chosenPharmacy, setChosenPharmacy] = useState(selectedPharmacy);
+
+  // Mettre à jour chosenPharmacy quand selectedPharmacy change
+  React.useEffect(() => {
+    setChosenPharmacy(selectedPharmacy);
+  }, [selectedPharmacy]);
+
+  // Fonction pour retirer la sélection
+  const handleRemovePharmacy = () => {
+    setChosenPharmacy(null);
+    console.log('✅ Pharmacie désélectionnée - Mode auto activé');
+  };
 
   if (!isOpen) return null;
 
@@ -156,14 +167,11 @@ function OrderModal({ isOpen, onClose, selectedPharmacy, nearbyPharmacies, userP
               </span>
             </div>
             <button 
-              className="change-pharmacy-btn"
-              onClick={() => {
-                onClose();
-                alert('Cliquez sur une autre pharmacie sur la carte pour changer');
-              }}
-              title="Changer de pharmacie"
+              className="remove-pharmacy-btn"
+              onClick={handleRemovePharmacy}
+              title="Retirer cette pharmacie (sélection automatique)"
             >
-              🔄
+              ✕
             </button>
           </div>
         )}

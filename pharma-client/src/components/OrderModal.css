@@ -201,7 +201,8 @@
   color: #c62828;
 }
 
-.change-pharmacy-btn {
+.change-pharmacy-btn,
+.remove-pharmacy-btn {
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -213,6 +214,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+}
+
+.remove-pharmacy-btn {
+  border-color: #666;
+  color: #666;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.remove-pharmacy-btn:hover {
+  background: #f44336;
+  border-color: #f44336;
+  color: white;
+  transform: scale(1.1);
 }
 
 .change-pharmacy-btn:hover {

@@ -217,11 +217,18 @@ async function dispatchOrder(order, io) {
     io.emit('courier:found', {
       orderId: order.id,
       courier: {
+        firstName: best.courier.firstName,
+        lastName: best.courier.lastName,
         name: `${best.courier.firstName} ${best.courier.lastName}`,
         distance: best.distanceKm,
         eta: best.estimatedTime
       }
     });
+    
+    console.log('✅ Notification "courier:found" envoyée au client');
+    
+    // Petit délai avant d'envoyer l'offre au livreur (pour que le client voie le message)
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
     // Broadcast à tous les livreurs
     io.emit('new:order', offerData);
@@ -229,7 +236,7 @@ async function dispatchOrder(order, io) {
     // Envoyer aussi une offre ciblée au meilleur livreur
     io.emit('new:order:offer', offerData);
     
-    console.log('✅ Notification envoyée !');
+    console.log('✅ Offre de commande envoyée aux livreurs');
     console.log('');
   }
 

@@ -356,11 +356,22 @@ function ClientHomeUltra() {
 
     socketService.on('courier:found', (data) => {
       console.log('✅ Livreur trouvé:', data);
-      setTimeout(() => {
-        setIsSearchingCourier(false);
-        setSearchType('');
-      }, 1500);
-      // Notification déjà gérée par order:accepted
+      
+      // Arrêter immédiatement le radar
+      setIsSearchingCourier(false);
+      setIsSearchingPharmacy(false);
+      setSearchType('');
+      
+      // Afficher notification d'attente
+      setNotification({
+        type: 'info',
+        title: '⏳ Livreur trouvé',
+        message: `${data.courier.firstName} ${data.courier.lastName} - En attente d'acceptation...`,
+        orderId: data.orderId,
+        showTrackButton: false
+      });
+      
+      // La notification sera remplacée par order:accepted quand le livreur accepte
     });
 
     socketService.on('courier:not-found', (data) => {
@@ -545,7 +556,7 @@ function ClientHomeUltra() {
       {notification && (
         <div className={`order-notification ${notification.type}`}>
           <div className="notification-icon">
-            {notification.type === 'success' ? '✅' : 'ℹ️'}
+            {notification.type === 'success' ? '✅' : notification.type === 'error' ? '❌' : '⏳'}
           </div>
           <div className="notification-content">
             <h4>{notification.title}</h4>

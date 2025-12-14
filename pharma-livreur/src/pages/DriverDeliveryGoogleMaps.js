@@ -22,7 +22,6 @@ function DriverDeliveryGoogleMaps() {
   const [isArriving, setIsArriving] = useState(false);
   const [routeData, setRouteData] = useState(null);
   const [nextTurn, setNextTurn] = useState(null);
-  const [distanceToNextTurn, setDistanceToNextTurn] = useState(null);
   const [speed, setSpeed] = useState(0);
 
   // Refs
@@ -71,13 +70,7 @@ function DriverDeliveryGoogleMaps() {
     };
 
     loadScript();
-
-    return () => {
-      if (watchIdRef.current) {
-        navigator.geolocation.clearWatch(watchIdRef.current);
-      }
-      mapInitializedRef.current = false;
-    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Initialiser la carte Google Maps
@@ -173,6 +166,7 @@ function DriverDeliveryGoogleMaps() {
       }
       googleMapRef.current.setMapTypeId(window.google.maps.MapTypeId.ROADMAP);
     }, 120);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deliveryStatus]);
 
   // Assurer l'affichage quand la position driver arrive
@@ -393,6 +387,7 @@ function DriverDeliveryGoogleMaps() {
         }
       }
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [driverPosition, deliveryStatus, pharmacyPosition, clientPosition]);
 
   // Vérifier la distance jusqu'à la destination
@@ -445,6 +440,8 @@ function DriverDeliveryGoogleMaps() {
           await completeDelivery(orderId);
           setDeliveryStatus('delivered');
           navigate('/livreur-dashboard');
+          break;
+        default:
           break;
       }
     } catch (error) {

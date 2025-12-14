@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Polyline, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import socketService from '../services/socket';
 import { getOrderById, startDelivery, arriveAtPharmacy, pickupDelivery, completeDelivery } from '../services/api';
-import { calculateCurrentRoute, calculateFullDeliveryRoute, shouldRecalculateRoute } from '../services/routingGoogleMaps';
+import { calculateCurrentRoute, shouldRecalculateRoute } from '../services/routingGoogleMaps';
 import 'leaflet/dist/leaflet.css';
 import './DriverDelivery.css';
 
@@ -185,7 +185,7 @@ function DriverDelivery() {
     };
     
     fetchRoute();
-    // IMPORTANT: Ne recalculer QUE quand le statut change, PAS à chaque changement de position
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deliveryStatus]);
   
   // Recalculer l'itinéraire si le livreur s'éloigne trop de la route

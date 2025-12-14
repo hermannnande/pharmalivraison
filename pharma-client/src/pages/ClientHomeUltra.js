@@ -86,6 +86,9 @@ function ClientHomeUltra() {
   const [searchRadius, setSearchRadius] = useState(5);
   const [searchPharmacyName, setSearchPharmacyName] = useState('');
   const location = useLocation();
+  
+  // État pour afficher/cacher la section de suivi
+  const [showTracking, setShowTracking] = useState(true);
 
   // Gérer la sélection de pharmacie sur la carte
   const handlePharmacyClick = (pharmacy) => {
@@ -796,45 +799,79 @@ function ClientHomeUltra() {
           {/* Suivi de livraison */}
           {selectedOrderId && deliveries[selectedOrderId] && (
             <div className="tracking-card">
-              <div className="tracking-header">
-                <div>
-                  <div className="tracking-title">Suivi commande {deliveries[selectedOrderId].orderNumber || selectedOrderId}</div>
-                  <div className="tracking-subtitle">
-                    {deliveries[selectedOrderId].status === 'to-pharmacy' ? 'En route vers la pharmacie' :
-                     deliveries[selectedOrderId].status === 'at-pharmacy' ? 'À la pharmacie' :
-                     deliveries[selectedOrderId].status === 'to-client' ? 'En route vers vous' :
-                     deliveries[selectedOrderId].status === 'delivered' ? 'Livrée' : 'Acceptée'}
-                  </div>
-                </div>
-                {deliveries[selectedOrderId].routeInfo && (
-                  <div className="tracking-metrics">
-                    <span>{deliveries[selectedOrderId].routeInfo.distance}</span>
-                    <span className="dot">•</span>
-                    <span>{deliveries[selectedOrderId].routeInfo.duration}</span>
-                  </div>
-                )}
+              {/* Bouton pour replier/déplier */}
+              <div 
+                className="tracking-toggle" 
+                onClick={() => setShowTracking(!showTracking)}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  cursor: 'pointer',
+                  padding: '8px 0',
+                  borderBottom: showTracking ? '1px solid rgba(255,255,255,0.1)' : 'none',
+                  marginBottom: showTracking ? '12px' : '0'
+                }}
+              >
+                <span style={{ fontWeight: '600', fontSize: '14px' }}>
+                  Suivi commande {deliveries[selectedOrderId].orderNumber || selectedOrderId}
+                </span>
+                <svg 
+                  width="20" 
+                  height="20" 
+                  viewBox="0 0 24 24" 
+                  fill="none"
+                  style={{
+                    transform: showTracking ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.3s ease'
+                  }}
+                >
+                  <path d="M7 10L12 15L17 10" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
               </div>
-              {deliveries[selectedOrderId].livreur && (
-                <div className="tracking-driver" onClick={() => focusOnOrder(selectedOrderId)}>
-                  <div className="avatar">{deliveries[selectedOrderId].livreur.name?.[0] || 'L'}</div>
-                  <div className="driver-info">
-                    <div className="driver-name">{deliveries[selectedOrderId].livreur.name}</div>
-                    <div className="driver-meta">
-                      <span>{deliveries[selectedOrderId].livreur.phone}</span>
-                      {(() => {
-                        const vehicleStr = formatVehicle(deliveries[selectedOrderId].livreur.vehicle);
-                        return vehicleStr
-                          ? (
-                            <>
-                              <span className="dot">•</span>
-                              <span>{vehicleStr}</span>
-                            </>
-                          )
-                          : null;
-                      })()}
+
+              {showTracking && (
+                <>
+                  <div className="tracking-header">
+                    <div>
+                      <div className="tracking-subtitle">
+                        {deliveries[selectedOrderId].status === 'to-pharmacy' ? 'En route vers la pharmacie' :
+                         deliveries[selectedOrderId].status === 'at-pharmacy' ? 'À la pharmacie' :
+                         deliveries[selectedOrderId].status === 'to-client' ? 'En route vers vous' :
+                         deliveries[selectedOrderId].status === 'delivered' ? 'Livrée' : 'Acceptée'}
+                      </div>
                     </div>
+                    {deliveries[selectedOrderId].routeInfo && (
+                      <div className="tracking-metrics">
+                        <span>{deliveries[selectedOrderId].routeInfo.distance}</span>
+                        <span className="dot">•</span>
+                        <span>{deliveries[selectedOrderId].routeInfo.duration}</span>
+                      </div>
+                    )}
                   </div>
-                </div>
+                  {deliveries[selectedOrderId].livreur && (
+                    <div className="tracking-driver" onClick={() => focusOnOrder(selectedOrderId)}>
+                      <div className="avatar">{deliveries[selectedOrderId].livreur.name?.[0] || 'L'}</div>
+                      <div className="driver-info">
+                        <div className="driver-name">{deliveries[selectedOrderId].livreur.name}</div>
+                        <div className="driver-meta">
+                          <span>{deliveries[selectedOrderId].livreur.phone}</span>
+                          {(() => {
+                            const vehicleStr = formatVehicle(deliveries[selectedOrderId].livreur.vehicle);
+                            return vehicleStr
+                              ? (
+                                <>
+                                  <span className="dot">•</span>
+                                  <span>{vehicleStr}</span>
+                                </>
+                              )
+                              : null;
+                          })()}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}
@@ -842,46 +879,73 @@ function ClientHomeUltra() {
           {/* Liste des commandes avec sélection */}
           {Object.values(deliveries).length > 0 && (
             <div className="tracking-list">
-              <h3>Vos commandes</h3>
-              <div className="list-items">
-                {Object.values(deliveries).map((d) => (
-                  <div
-                    key={d.orderId || d.orderNumber}
-                    className={`tracking-item ${selectedOrderId === d.orderId ? 'selected' : ''}`}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => {
-                      setSelectedOrderId(d.orderId);
-                      focusOnOrder(d.orderId);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
+              <div 
+                className="tracking-toggle" 
+                onClick={() => setShowTracking(!showTracking)}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  cursor: 'pointer',
+                  padding: '8px 0',
+                  marginBottom: showTracking ? '12px' : '0'
+                }}
+              >
+                <h3 style={{ margin: 0 }}>Vos commandes</h3>
+                <svg 
+                  width="20" 
+                  height="20" 
+                  viewBox="0 0 24 24" 
+                  fill="none"
+                  style={{
+                    transform: showTracking ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.3s ease'
+                  }}
+                >
+                  <path d="M7 10L12 15L17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+              </div>
+              {showTracking && (
+                <div className="list-items">
+                  {Object.values(deliveries).map((d) => (
+                    <div
+                      key={d.orderId || d.orderNumber}
+                      className={`tracking-item ${selectedOrderId === d.orderId ? 'selected' : ''}`}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => {
                         setSelectedOrderId(d.orderId);
                         focusOnOrder(d.orderId);
-                      }
-                    }}
-                  >
-                    <div className="tracking-item-main">
-                      <div className="tracking-item-title">{d.orderNumber || `Commande ${d.orderId}`}</div>
-                      <div className="tracking-item-sub">
-                        {d.status === 'to-pharmacy' ? 'Vers la pharmacie' :
-                         d.status === 'at-pharmacy' ? 'À la pharmacie' :
-                         d.status === 'to-client' ? 'Vers vous' :
-                         d.status === 'delivered' ? 'Livrée' : 'Acceptée'}
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          setSelectedOrderId(d.orderId);
+                          focusOnOrder(d.orderId);
+                        }
+                      }}
+                    >
+                      <div className="tracking-item-main">
+                        <div className="tracking-item-title">{d.orderNumber || `Commande ${d.orderId}`}</div>
+                        <div className="tracking-item-sub">
+                          {d.status === 'to-pharmacy' ? 'Vers la pharmacie' :
+                           d.status === 'at-pharmacy' ? 'À la pharmacie' :
+                           d.status === 'to-client' ? 'Vers vous' :
+                           d.status === 'delivered' ? 'Livrée' : 'Acceptée'}
+                        </div>
+                      </div>
+                      <div className="tracking-item-meta">
+                        {d.livreur?.name && <span>{d.livreur.name}</span>}
+                        {d.routeInfo?.distance && (
+                          <>
+                            <span className="dot">•</span>
+                            <span>{d.routeInfo.distance}</span>
+                          </>
+                        )}
                       </div>
                     </div>
-                    <div className="tracking-item-meta">
-                      {d.livreur?.name && <span>{d.livreur.name}</span>}
-                      {d.routeInfo?.distance && (
-                        <>
-                          <span className="dot">•</span>
-                          <span>{d.routeInfo.distance}</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

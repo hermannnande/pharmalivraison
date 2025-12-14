@@ -18,47 +18,62 @@ async function getNearbyPharmacies(latitude = ABIDJAN_CENTER.lat, longitude = AB
     }
 
     const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json`;
-    
-    const params = {
-      location: `${latitude},${longitude}`,
-      radius: radius,
-      type: 'pharmacy',
-      key: GOOGLE_MAPS_API_KEY,
-      language: 'fr'
-    };
 
-    console.log('🔍 Recherche pharmacies via Google Places API...');
-    const response = await axios.get(url, { params });
+    let pageToken = null;
+    let allResults = [];
+    let pageCount = 0;
 
-    if (response.data.status !== 'OK' && response.data.status !== 'ZERO_RESULTS') {
-      console.error('❌ Erreur Google Places:', response.data.status);
-      return { success: false, pharmacies: [], error: response.data.status };
-    }
+    do {
+      const params = {
+        location: `${latitude},${longitude}`,
+        radius: radius,
+        type: 'pharmacy',
+        key: GOOGLE_MAPS_API_KEY,
+        language: 'fr',
+        pagetoken: pageToken || undefined,
+      };
 
-    const pharmacies = response.data.results.map(place => ({
-      id: place.place_id,
-      name: place.name,
-      address: place.vicinity || place.formatted_address || 'Adresse non disponible',
-      position: [place.geometry.location.lat, place.geometry.location.lng],
-      location: {
-        lat: place.geometry.location.lat,
-        lng: place.geometry.location.lng
-      },
-      isOpen: place.opening_hours?.open_now || false,
-      rating: place.rating || 0,
-      totalRatings: place.user_ratings_total || 0,
-      phone: place.formatted_phone_number || null,
-      placeId: place.place_id,
-      // Déterminer si c'est une pharmacie de garde (simulation - à améliorer avec vraies données)
-      isDeGarde: Math.random() > 0.85 // 15% de chances (à remplacer par vraies données)
-    }));
+      // Les next_page_token nécessitent ~2s avant d'être valides
+      if (pageToken) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
 
-    console.log(`✅ ${pharmacies.length} pharmacies trouvées`);
+      console.log(`🔍 Recherche pharmacies via Google Places API... page ${pageCount + 1}`);
+      const response = await axios.get(url, { params });
+
+      if (response.data.status !== 'OK' && response.data.status !== 'ZERO_RESULTS') {
+        console.error('❌ Erreur Google Places:', response.data.status);
+        break;
+      }
+
+      const mapped = response.data.results.map(place => ({
+        id: place.place_id,
+        name: place.name,
+        address: place.vicinity || place.formatted_address || 'Adresse non disponible',
+        position: [place.geometry.location.lat, place.geometry.location.lng],
+        location: {
+          lat: place.geometry.location.lat,
+          lng: place.geometry.location.lng
+        },
+        isOpen: place.opening_hours?.open_now || false,
+        rating: place.rating || 0,
+        totalRatings: place.user_ratings_total || 0,
+        phone: place.formatted_phone_number || null,
+        placeId: place.place_id,
+        isDeGarde: Math.random() > 0.85 // Simulation
+      }));
+
+      allResults = allResults.concat(mapped);
+      pageToken = response.data.next_page_token || null;
+      pageCount += 1;
+    } while (pageToken && pageCount < 3); // max ~60 résultats
+
+    console.log(`✅ ${allResults.length} pharmacies trouvées (Google Places, rayon ${radius}m)`);
     
     return {
       success: true,
-      pharmacies: pharmacies,
-      total: pharmacies.length
+      pharmacies: allResults,
+      total: allResults.length
     };
 
   } catch (error) {

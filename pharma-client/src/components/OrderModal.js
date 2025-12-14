@@ -361,7 +361,7 @@ function OrderModal({ isOpen, onClose, selectedPharmacy, nearbyPharmacies, userP
                 <h4>📊 Estimation</h4>
                 <div className="estimation-row">
                   <span>Médicaments</span>
-                  <strong>2 000 - 15 000 FCFA</strong>
+                  <strong style={{ fontSize: '13px', color: '#666' }}>Prix fixés par la pharmacie</strong>
                 </div>
                 <div className="estimation-row">
                   <span>Livraison</span>
@@ -372,7 +372,7 @@ function OrderModal({ isOpen, onClose, selectedPharmacy, nearbyPharmacies, userP
                   <strong>25 - 35 min</strong>
                 </div>
                 <p className="estimation-note">
-                  * Prix final selon le montant réel à la pharmacie
+                  * Le montant des médicaments sera confirmé par la pharmacie
                 </p>
               </div>
             )}
@@ -382,6 +382,15 @@ function OrderModal({ isOpen, onClose, selectedPharmacy, nearbyPharmacies, userP
               <button type="submit" className="btn-submit fade-in">
                 Commander maintenant
               </button>
+            )}
+
+            {/* Bouton visible en mode auto même sans option sélectionnée */}
+            {!selectedOption && !chosenPharmacy && (
+              <div className="auto-mode-prompt fade-in">
+                <p className="prompt-text">
+                  💡 Choisissez une option ci-dessus pour commander
+                </p>
+              </div>
             )}
           </div>
         </form>

@@ -44,21 +44,6 @@ function App() {
   );
 }
 
-// Composant Coming Soon temporaire
-function ComingSoon({ title }) {
-  const navigate = require('react-router-dom').useNavigate();
-  return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5', padding: '20px' }}>
-      <h1 style={{ fontSize: '48px', margin: '20px 0' }}>🚧</h1>
-      <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#333', marginBottom: '8px' }}>{title}</h2>
-      <p style={{ fontSize: '16px', color: '#666', marginBottom: '24px' }}>Fonctionnalité en cours de développement</p>
-      <button onClick={() => navigate(-1)} style={{ padding: '12px 24px', background: '#2e7d32', color: 'white', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer' }}>
-        Retour
-      </button>
-    </div>
-  );
-}
-
 // Page SOS
 function SOSPage() {
   const navigate = require('react-router-dom').useNavigate();

@@ -8,7 +8,6 @@ function Settings() {
   const [notifications, setNotifications] = useState(true);
   const [sound, setSound] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
-  const [language, setLanguage] = useState('fr');
 
   const handleLogout = () => {
     if (window.confirm('Voulez-vous vraiment vous déconnecter ?')) {

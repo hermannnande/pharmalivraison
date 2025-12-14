@@ -313,6 +313,8 @@ function ClientHomeUltra() {
     socketService.on('pharmacy:found', (data) => {
       console.log('✅ Pharmacie trouvée:', data.pharmacy.name);
       setSearchPharmacyName(data.pharmacy.name);
+      
+      // Arrêter le radar après 1.5 secondes
       setTimeout(() => {
         setIsSearchingPharmacy(false);
         setSearchType('');
@@ -322,11 +324,25 @@ function ClientHomeUltra() {
       setNotification({
         type: 'success',
         title: '🏥 Pharmacie trouvée !',
-        message: `${data.pharmacy.name} sélectionnée à ${data.radius} km`,
+        message: `${data.pharmacy.name} sélectionnée${data.radius !== 'locale' ? ` à ${data.radius} km` : ''}`,
         orderId: null,
         showTrackButton: false
       });
       setTimeout(() => setNotification(null), 5000);
+    });
+
+    socketService.on('pharmacy:not-found', (data) => {
+      console.log('❌ Aucune pharmacie trouvée');
+      setIsSearchingPharmacy(false);
+      setSearchType('');
+      
+      setNotification({
+        type: 'error',
+        title: '❌ Aucune pharmacie disponible',
+        message: data.message || 'Aucune pharmacie ouverte dans votre zone',
+        showTrackButton: false
+      });
+      setTimeout(() => setNotification(null), 8000);
     });
 
     // Écouter les événements de recherche de livreur (avec wildcard pour tous les orderId)

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 // import { useNavigate } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, Popup, Circle, Polyline } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Circle, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import OrderModal from '../components/OrderModal';
@@ -43,6 +43,18 @@ const driverIcon = L.divIcon({
   iconSize: [50, 50],
   iconAnchor: [25, 25]
 });
+
+// Composant pour recentrer la carte sur la position utilisateur
+function MapCenterController({ center }) {
+  const map = useMap();
+  useEffect(() => {
+    if (center && center.length === 2) {
+      console.log('📍 Recentrage carte sur:', center);
+      map.setView(center, 14);
+    }
+  }, [center, map]);
+  return null;
+}
 
 function ClientHomeUltra() {
   // const navigate = useNavigate();
@@ -146,12 +158,26 @@ function ClientHomeUltra() {
             useRealData: 'true',
             lat,
             lng
+          },
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
         });
         
         if (response.data.success && response.data.pharmacies) {
           console.log(`✅ ${response.data.pharmacies.length} pharmacies chargées (source: ${response.data.source})`);
-          setNearbyPharmacies(response.data.pharmacies);
+          
+          // Convertir les données pour compatibilité avec l'interface
+          const formattedPharmacies = response.data.pharmacies.map(p => ({
+            ...p,
+            // S'assurer que position est au bon format [lat, lng]
+            position: Array.isArray(p.position) ? p.position : [p.location.lat, p.location.lng]
+          }));
+          
+          setNearbyPharmacies(formattedPharmacies);
+        } else {
+          console.warn('⚠️ Aucune pharmacie trouvée');
+          setNearbyPharmacies([]);
         }
       } catch (error) {
         console.error('❌ Erreur chargement pharmacies:', error);
@@ -460,6 +486,9 @@ function ClientHomeUltra() {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; OpenStreetMap contributors'
           />
+
+          {/* Contrôleur de centrage automatique */}
+          <MapCenterController center={userPosition} />
 
           {/* Position de l'utilisateur */}
           <Marker position={userPosition} icon={userIcon}>

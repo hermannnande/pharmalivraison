@@ -4,7 +4,16 @@ echo   BUILD APK - PHARMA LIVREUR
 echo ========================================
 echo.
 
-echo [1/4] Build React App...
+REM Configurer l'environnement
+echo [0/5] Configuration environnement...
+for /d %%i in ("C:\Program Files\Eclipse Adoptium\jdk-*") do set "JAVA_HOME=%%i"
+if not defined JAVA_HOME (
+    for /d %%i in ("C:\Program Files\Java\jdk-*") do set "JAVA_HOME=%%i"
+)
+set "ANDROID_HOME=%LOCALAPPDATA%\Android\Sdk"
+set "PATH=%JAVA_HOME%\bin;%ANDROID_HOME%\platform-tools;%PATH%"
+
+echo [1/5] Build React App...
 cd pharma-livreur
 call npm run build
 if %errorlevel% neq 0 (
@@ -14,7 +23,7 @@ if %errorlevel% neq 0 (
 )
 
 echo.
-echo [2/4] Sync avec Capacitor...
+echo [2/5] Sync avec Capacitor...
 call npx cap sync android
 if %errorlevel% neq 0 (
     echo ERREUR lors de la synchronisation!
@@ -23,25 +32,33 @@ if %errorlevel% neq 0 (
 )
 
 echo.
-echo [3/4] Build APK Android...
+echo [3/5] Preparation Gradle...
 cd android
+if not exist "local.properties" (
+    echo sdk.dir=%ANDROID_HOME:\=\\%> local.properties
+    echo Configuration local.properties creee
+)
+
+echo.
+echo [4/5] Build APK Android (peut prendre 5-10 minutes)...
 call gradlew assembleDebug
 if %errorlevel% neq 0 (
     echo ERREUR lors du build Android!
     echo.
-    echo Assurez-vous d'avoir:
-    echo - Java JDK 11 ou superieur installe
-    echo - JAVA_HOME configure
-    echo - Android SDK installe
+    echo Verifiez:
+    echo - Java JDK 11+ installe
+    echo - Android SDK installe via Android Studio
+    echo - Variables d'environnement configurees
+    echo.
     pause
     exit /b 1
 )
 
 echo.
-echo [4/4] Copie de l'APK...
+echo [5/5] Copie de l'APK...
 cd ..
 if not exist "apk" mkdir apk
-copy "android\app\build\outputs\apk\debug\app-debug.apk" "apk\PharmaLivreur.apk"
+copy "android\app\build\outputs\apk\debug\app-debug.apk" "apk\PharmaLivreur.apk" >nul
 
 echo.
 echo ========================================
@@ -49,8 +66,9 @@ echo   BUILD TERMINE !
 echo ========================================
 echo.
 echo APK cree: pharma-livreur\apk\PharmaLivreur.apk
+echo Taille: 
+dir "apk\PharmaLivreur.apk" | find "PharmaLivreur.apk"
 echo.
 echo Transferez ce fichier sur votre telephone et installez-le.
 echo.
 pause
-

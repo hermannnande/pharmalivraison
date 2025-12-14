@@ -21,13 +21,8 @@ function OrderModal({ isOpen, onClose, selectedPharmacy, nearbyPharmacies, userP
       alert('Veuillez choisir une option');
       return;
     }
-
-    if (!chosenPharmacy) {
-      alert('Veuillez sélectionner une pharmacie');
-      return;
-    }
     
-    // Créer l'objet commande avec la pharmacie réelle sélectionnée
+    // Créer l'objet commande avec ou sans pharmacie sélectionnée
     const orderData = {
       orderType: selectedOption,
       medicationList: selectedOption === 'liste' ? medicationList : '',
@@ -36,13 +31,21 @@ function OrderModal({ isOpen, onClose, selectedPharmacy, nearbyPharmacies, userP
       forOther: forOther,
       recipientName: forOther ? recipientName : '',
       recipientPhone: forOther ? recipientPhone : '',
-      pharmacyId: chosenPharmacy.id || chosenPharmacy.place_id, // ID Google Places ou local
-      pharmacyName: chosenPharmacy.name,
-      pharmacyAddress: chosenPharmacy.address,
-      deliveryAddress: 'Position actuelle', // TODO: Géolocalisation précise
-      deliveryLocation: { lat: userPosition[0], lng: userPosition[1] },
-      pharmacyLocation: { lat: chosenPharmacy.position[0], lng: chosenPharmacy.position[1] }
+      deliveryAddress: 'Position actuelle',
+      deliveryLocation: { lat: userPosition[0], lng: userPosition[1] }
     };
+
+    // Si une pharmacie est sélectionnée, l'ajouter à la commande
+    if (chosenPharmacy) {
+      orderData.pharmacyId = chosenPharmacy.id || chosenPharmacy.place_id;
+      orderData.pharmacyName = chosenPharmacy.name;
+      orderData.pharmacyAddress = chosenPharmacy.address;
+      orderData.pharmacyLocation = { 
+        lat: chosenPharmacy.position[0], 
+        lng: chosenPharmacy.position[1] 
+      };
+    }
+    // Sinon, le backend sélectionnera automatiquement une pharmacie ouverte
 
     try {
       // Envoyer la commande au backend [VERSION 2]
@@ -58,7 +61,7 @@ function OrderModal({ isOpen, onClose, selectedPharmacy, nearbyPharmacies, userP
           <div class="success-icon-custom">✅</div>
           <h3>Commande envoyée !</h3>
           <p>Commande N° ${response.order.orderNumber}</p>
-          <p>Pharmacie: <strong>${chosenPharmacy.name}</strong></p>
+          ${chosenPharmacy ? `<p>Pharmacie: <strong>${chosenPharmacy.name}</strong></p>` : '<p>Une pharmacie ouverte sera sélectionnée automatiquement</p>'}
           <p>Un livreur proche de votre position va être assigné automatiquement.</p>
           <div class="success-loader"></div>
         </div>
@@ -141,7 +144,7 @@ function OrderModal({ isOpen, onClose, selectedPharmacy, nearbyPharmacies, userP
               }}
               className="pharmacy-select"
             >
-              <option value="">-- Sélectionnez une pharmacie --</option>
+              <option value="">-- Sélection automatique (recommandé) --</option>
               {nearbyPharmacies.slice(0, 10).map((pharmacy) => (
                 <option key={pharmacy.id || pharmacy.place_id} value={pharmacy.id || pharmacy.place_id}>
                   {pharmacy.name} - {pharmacy.address || 'Adresse non disponible'}

@@ -613,7 +613,7 @@ app.get('/api/orders/:id', (req, res) => {
 });
 
 // Créer une commande
-app.post('/api/orders', (req, res) => {
+app.post('/api/orders', async (req, res) => {
   const token = req.header('Authorization')?.replace('Bearer ', '');
   
   if (!token) {
@@ -623,11 +623,74 @@ app.post('/api/orders', (req, res) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret-dev-key');
     
+    // Si aucune pharmacie n'est fournie, en sélectionner une automatiquement
+    let pharmacyData = {
+      pharmacyId: req.body.pharmacyId,
+      pharmacyName: req.body.pharmacyName,
+      pharmacyAddress: req.body.pharmacyAddress,
+      pharmacyLocation: req.body.pharmacyLocation
+    };
+
+    // Sélection automatique de pharmacie si non fournie
+    if (!pharmacyData.pharmacyLocation && (req.body.deliveryLocation || req.body.clientLocation)) {
+      const clientLoc = req.body.deliveryLocation || req.body.clientLocation;
+      console.log('🔍 Aucune pharmacie sélectionnée, recherche automatique...');
+      
+      // Essayer d'abord avec Google Places
+      try {
+        const result = await placesService.searchPharmacies(
+          clientLoc.lat, 
+          clientLoc.lng, 
+          5000, // 5km de rayon
+          'pharmacy'
+        );
+        
+        if (result.success && result.pharmacies && result.pharmacies.length > 0) {
+          // Filtrer les pharmacies ouvertes en priorité
+          const openPharmacies = result.pharmacies.filter(p => p.isOpen);
+          const selectedPharmacy = openPharmacies.length > 0 
+            ? openPharmacies[0] 
+            : result.pharmacies[0];
+          
+          pharmacyData = {
+            pharmacyId: selectedPharmacy.id || selectedPharmacy.place_id,
+            pharmacyName: selectedPharmacy.name,
+            pharmacyAddress: selectedPharmacy.address || selectedPharmacy.vicinity,
+            pharmacyLocation: {
+              lat: selectedPharmacy.location.lat,
+              lng: selectedPharmacy.location.lng
+            }
+          };
+          
+          console.log(`✅ Pharmacie auto-sélectionnée: ${pharmacyData.pharmacyName}`);
+          console.log(`   ${pharmacyData.pharmacyAddress}`);
+          console.log(`   ${selectedPharmacy.isOpen ? '🟢 Ouverte' : '🔴 Fermée'}`);
+        }
+      } catch (error) {
+        console.warn('⚠️ Erreur Google Places, fallback données locales');
+      }
+      
+      // Fallback: pharmacie locale si Google Places échoue
+      if (!pharmacyData.pharmacyLocation) {
+        const nearbyPharmacy = pharmacies.find(p => p.isOpen) || pharmacies[0];
+        if (nearbyPharmacy) {
+          pharmacyData = {
+            pharmacyId: nearbyPharmacy.id,
+            pharmacyName: nearbyPharmacy.name,
+            pharmacyAddress: nearbyPharmacy.address,
+            pharmacyLocation: nearbyPharmacy.location
+          };
+          console.log(`✅ Pharmacie locale auto-sélectionnée: ${pharmacyData.pharmacyName}`);
+        }
+      }
+    }
+    
     const newOrder = {
       id: String(orders.length + 1),
       orderNumber: 'CMD' + String(orders.length + 1).padStart(3, '0'),
       clientId: decoded.id,
       ...req.body,
+      ...pharmacyData, // Intégrer les données de pharmacie (auto ou manuelle)
       status: 'pending',
       createdAt: new Date()
     };
@@ -640,6 +703,7 @@ app.post('/api/orders', (req, res) => {
     console.log('========================================');
     console.log('Numéro:', newOrder.orderNumber);
     console.log('Client:', decoded.phone);
+    console.log('Pharmacie:', pharmacyData.pharmacyName || 'Non définie');
     console.log('');
     
     // DISPATCH AUTOMATIQUE vers le meilleur livreur
@@ -651,9 +715,9 @@ app.post('/api/orders', (req, res) => {
         clientPhone: decoded.phone,
         clientAddress: req.body.deliveryAddress,
         clientLocation: req.body.deliveryLocation || req.body.clientLocation,
-        pharmacyName: req.body.pharmacyName,
-        pharmacyAddress: req.body.pharmacyAddress,
-        pharmacyLocation: req.body.pharmacyLocation,
+        pharmacyName: pharmacyData.pharmacyName,
+        pharmacyAddress: pharmacyData.pharmacyAddress,
+        pharmacyLocation: pharmacyData.pharmacyLocation,
         medications: req.body.medications,
         orderType: req.body.orderType,
         medicationList: req.body.medicationList,

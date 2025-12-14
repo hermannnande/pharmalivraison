@@ -636,53 +636,64 @@ app.post('/api/orders', async (req, res) => {
       const clientLoc = req.body.deliveryLocation || req.body.clientLocation;
       console.log('🔍 Aucune pharmacie sélectionnée, recherche automatique...');
       
-      // Essayer d'abord avec Google Places
-      try {
-        const result = await placesService.searchPharmacies(
-          clientLoc.lat, 
-          clientLoc.lng, 
-          10000, // 10km de rayon (même périmètre que l'affichage client)
-          'pharmacy'
-        );
+      // Recherche en cascade avec rayons croissants (10km → 12km → 15km)
+      const searchRadii = [10000, 12000, 15000]; // en mètres
+      let selectedPharmacy = null;
+      
+      for (const radius of searchRadii) {
+        console.log(`   📡 Recherche dans un rayon de ${radius / 1000} km...`);
         
-        if (result.success && result.pharmacies && result.pharmacies.length > 0) {
-          // Filtrer les pharmacies ouvertes en priorité
-          const openPharmacies = result.pharmacies.filter(p => p.isOpen);
-          const selectedPharmacy = openPharmacies.length > 0 
-            ? openPharmacies[0] 
-            : result.pharmacies[0];
+        try {
+          const result = await placesService.searchPharmacies(
+            clientLoc.lat, 
+            clientLoc.lng, 
+            radius,
+            'pharmacy'
+          );
           
-          pharmacyData = {
-            pharmacyId: selectedPharmacy.id || selectedPharmacy.place_id,
-            pharmacyName: selectedPharmacy.name,
-            pharmacyAddress: selectedPharmacy.address || selectedPharmacy.vicinity,
-            pharmacyLocation: {
-              lat: selectedPharmacy.location.lat,
-              lng: selectedPharmacy.location.lng
+          if (result.success && result.pharmacies && result.pharmacies.length > 0) {
+            // IMPORTANT : Filtrer UNIQUEMENT les pharmacies OUVERTES
+            const openPharmacies = result.pharmacies.filter(p => p.isOpen);
+            
+            if (openPharmacies.length > 0) {
+              selectedPharmacy = openPharmacies[0]; // Prendre la première pharmacie ouverte
+              console.log(`   ✅ Pharmacie ouverte trouvée à ${radius / 1000} km`);
+              break; // Arrêter la recherche
+            } else {
+              console.log(`   ⚠️ ${result.pharmacies.length} pharmacie(s) trouvée(s) mais toutes fermées`);
             }
-          };
-          
-          console.log(`✅ Pharmacie auto-sélectionnée: ${pharmacyData.pharmacyName}`);
-          console.log(`   ${pharmacyData.pharmacyAddress}`);
-          console.log(`   ${selectedPharmacy.isOpen ? '🟢 Ouverte' : '🔴 Fermée'}`);
+          } else {
+            console.log(`   ⚠️ Aucune pharmacie trouvée dans ce rayon`);
+          }
+        } catch (error) {
+          console.warn(`   ❌ Erreur recherche à ${radius / 1000} km:`, error.message);
         }
-      } catch (error) {
-        console.warn('⚠️ Erreur Google Places, fallback données locales');
       }
       
-      // Fallback: pharmacie locale si Google Places échoue
-      if (!pharmacyData.pharmacyLocation) {
-        const nearbyPharmacy = pharmacies.find(p => p.isOpen) || pharmacies[0];
-        if (nearbyPharmacy) {
-          pharmacyData = {
-            pharmacyId: nearbyPharmacy.id,
-            pharmacyName: nearbyPharmacy.name,
-            pharmacyAddress: nearbyPharmacy.address,
-            pharmacyLocation: nearbyPharmacy.location
-          };
-          console.log(`✅ Pharmacie locale auto-sélectionnée: ${pharmacyData.pharmacyName}`);
-        }
+      // Si aucune pharmacie ouverte trouvée après toutes les tentatives
+      if (!selectedPharmacy) {
+        console.error('❌ AUCUNE PHARMACIE OUVERTE TROUVÉE dans un rayon de 15 km');
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Aucune pharmacie ouverte trouvée dans votre zone. Veuillez réessayer plus tard ou sélectionner manuellement une pharmacie.',
+          error: 'NO_OPEN_PHARMACY'
+        });
       }
+      
+      // Pharmacie ouverte trouvée !
+      pharmacyData = {
+        pharmacyId: selectedPharmacy.id || selectedPharmacy.place_id,
+        pharmacyName: selectedPharmacy.name,
+        pharmacyAddress: selectedPharmacy.address || selectedPharmacy.vicinity,
+        pharmacyLocation: {
+          lat: selectedPharmacy.location.lat,
+          lng: selectedPharmacy.location.lng
+        }
+      };
+      
+      console.log(`✅ Pharmacie auto-sélectionnée: ${pharmacyData.pharmacyName}`);
+      console.log(`   ${pharmacyData.pharmacyAddress}`);
+      console.log(`   🟢 OUVERTE - Prête pour la livraison`);
     }
     
     const newOrder = {

@@ -83,7 +83,17 @@ function OrderModal({ isOpen, onClose, selectedPharmacy, nearbyPharmacies, userP
       setRecipientPhone('');
     } catch (error) {
       console.error('❌ Erreur lors de la création de la commande:', error);
-      alert('Erreur lors de l\'envoi de la commande. Veuillez réessayer.');
+      
+      // Gestion spécifique de l'erreur "Aucune pharmacie ouverte"
+      if (error.response?.data?.error === 'NO_OPEN_PHARMACY') {
+        alert('❌ Aucune pharmacie ouverte trouvée dans un rayon de 15 km.\n\n' +
+              'Options :\n' +
+              '• Sélectionnez manuellement une pharmacie dans la liste\n' +
+              '• Réessayez plus tard\n' +
+              '• Contactez le support pour assistance');
+      } else {
+        alert('Erreur lors de l\'envoi de la commande. Veuillez réessayer.');
+      }
     }
   };
 

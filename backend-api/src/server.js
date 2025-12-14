@@ -672,12 +672,26 @@ app.post('/api/orders', async (req, res) => {
       
       // Si aucune pharmacie ouverte trouvée après toutes les tentatives
       if (!selectedPharmacy) {
-        console.error('❌ AUCUNE PHARMACIE OUVERTE TROUVÉE dans un rayon de 15 km');
-        return res.status(400).json({ 
-          success: false, 
-          message: 'Aucune pharmacie ouverte trouvée dans votre zone. Veuillez réessayer plus tard ou sélectionner manuellement une pharmacie.',
-          error: 'NO_OPEN_PHARMACY'
-        });
+        // Fallback ultime : données locales
+        const fallbackLocal = pharmacies.find(p => p.isOpen) || pharmacies[0];
+        if (fallbackLocal) {
+          console.warn('⚠️ Aucune pharmacie Google ouverte, fallback sur données locales');
+          selectedPharmacy = {
+            id: fallbackLocal.id,
+            place_id: fallbackLocal.id,
+            name: fallbackLocal.name,
+            address: fallbackLocal.address,
+            location: fallbackLocal.location,
+            isOpen: fallbackLocal.isOpen !== false // considérer ouverte si info absente
+          };
+        } else {
+          console.error('❌ AUCUNE PHARMACIE OUVERTE TROUVÉE dans un rayon de 15 km');
+          return res.status(400).json({ 
+            success: false, 
+            message: 'Aucune pharmacie ouverte trouvée dans votre zone. Veuillez réessayer plus tard ou sélectionner manuellement une pharmacie.',
+            error: 'NO_OPEN_PHARMACY'
+          });
+        }
       }
       
       // Pharmacie ouverte trouvée !

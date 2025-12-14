@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 // import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, Circle, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -84,6 +85,7 @@ function ClientHomeUltra() {
   const [isSearchingCourier, setIsSearchingCourier] = useState(false);
   const [searchRadius, setSearchRadius] = useState(5);
   const [searchPharmacyName, setSearchPharmacyName] = useState('');
+  const location = useLocation();
 
   // Gérer la sélection de pharmacie sur la carte
   const handlePharmacyClick = (pharmacy) => {
@@ -125,6 +127,45 @@ function ClientHomeUltra() {
       mapRef.current.fitBounds(bounds, { padding: [40, 40] });
     }
   };
+
+  // Si on arrive depuis "Suivre sur la carte" (OrderHistory)
+  useEffect(() => {
+    const trackId = location.state?.trackOrderId;
+    if (trackId) {
+      setSelectedOrderId(trackId);
+      // Charger les détails pour s'assurer d'avoir les positions
+      (async () => {
+        try {
+          const res = await getOrderById(trackId);
+          if (res?.order) {
+            const order = res.order;
+            const pharmLoc = order.pharmacyLocation || order.pharmacy?.location || order.pharmacyCoords;
+            const clientLoc = order.deliveryLocation || order.clientLocation || order.destination;
+            setDeliveries(prev => ({
+              ...prev,
+              [trackId]: {
+                ...(prev[trackId] || {}),
+                orderId: trackId,
+                orderNumber: order.orderNumber || order.id,
+                status: order.status || 'pending',
+                pharmacyPosition: pharmLoc?.latitude && pharmLoc?.longitude ? [pharmLoc.latitude, pharmLoc.longitude] : null,
+                clientPosition: clientLoc?.latitude && clientLoc?.longitude ? [clientLoc.latitude, clientLoc.longitude] : null,
+                driverPosition: prev[trackId]?.driverPosition || null,
+                routeCoords: prev[trackId]?.routeCoords || [],
+                routeInfo: prev[trackId]?.routeInfo || null,
+                livreur: prev[trackId]?.livreur || order.livreur || null
+              }
+            }));
+            // Petit délai pour laisser la carte se rendre puis focus
+            setTimeout(() => focusOnOrder(trackId, deliveries), 300);
+          }
+        } catch (e) {
+          console.error('❌ Impossible de charger la commande pour le suivi:', e);
+        }
+      })();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state?.trackOrderId]);
 
   // Fonction pour vérifier si on est en période d'urgence (week-end ou 18h-6h)
   const isUrgentTime = () => {
